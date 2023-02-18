@@ -45,7 +45,7 @@ app.post('/importFile', (req, res) => {
     })
     
 })
-app.listen(3000, async () => {
+app.listen(3001, async () => {
     try {
         await db.connect()
         console.log('connected to database ...')
