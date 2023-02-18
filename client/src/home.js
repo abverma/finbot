@@ -120,10 +120,10 @@ function Table(props) {
 	return (
 		<div className='card border-0 table-responsive shadow'>
 			<div className='card-header border-0 row white'>
-				<div className='col-3'>
+				<div className='col-md-3 col-12 justify-content-center'>
 					<h6 className='card-header-title h6 p-2 text-muted'>EXPENSES {' - ' + titleDateString}</h6>
 				</div>
-				<div className='col-2'>
+				<div className='col-md-2 col-12'>
 					<select id='selectCategory' className='form-select form-select-sm' onChange={(e) => props.handleSelectCategory(e.target.value)}>
 						<option defaultValue value=''>No filter</option>
 						<option value='amazon'>Amazon</option>
@@ -185,8 +185,8 @@ function Summary(props) {
 					props.aggregate ? props.aggregate.map((rec, idx) => {
 						return (
 							<dl key={idx} className='row mb-1'>
-								<dt className='col-2'>{rec._id.replace(rec._id.charAt(0), rec._id.charAt(0).toUpperCase())}</dt>
-								<dd className='col'>
+								<dt className='col-md-2 col-6'>{rec._id.replace(rec._id.charAt(0), rec._id.charAt(0).toUpperCase())}</dt>
+								<dd className='col-md-10 col-6'>
 									{rec.total.toLocaleString('en-IN', {
 										style: 'currency',
 										currency: 'INR',
@@ -198,8 +198,8 @@ function Summary(props) {
 				}
 				{props.total ? (
 					<dl className='row mt-4'>
-						<dt className='col-2'>Total Expense</dt>
-						<dd className='col'>
+						<dt className='col-md-2 col-6'>Total Expense</dt>
+						<dd className='col-md-10 col-6'>
 							{props.total.toLocaleString('en-IN', {
 								style: 'currency',
 								currency: 'INR',
