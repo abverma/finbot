@@ -1,0 +1,131 @@
+const ignoredExpenses = [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593-FROM HDFC/]
+const totalClause = {
+    $sum: {
+        $cond: [
+            {
+                $gt: ['$debit_amount', 0],
+            },
+            '$debit_amount',
+            { $multiply: ['$credit_amount', -1] },
+        ],
+    },
+}
+
+const getExpenses = async (req, res, next, db) => {
+    console.log(req.query)
+    const startDate = new Date(req.query.startDate)
+    const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
+
+    console.log(`start date: ${startDate}`)
+    console.log(`end date: ${new Date(endDate)}`)
+    
+    try {
+        const data = await db.queryExpense({
+            date: {
+                $gte: startDate,
+                $lt: endDate
+            },
+            details: {
+                $nin: ignoredExpenses
+            }
+        })
+        const pipelines = [
+            {
+                $match: {
+                    expense_source: {
+                        $ne: 'ora sal',
+                    },
+                    date: { 
+                        $gte: startDate,
+                        $lt: endDate
+                    },
+                    details: {
+                        $nin: [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593-FROM HDFC/]
+                    }
+                },
+            },
+            { 
+                $group: { 
+                    _id: '$category',
+                    total: totalClause 
+                } 
+            },
+            {   $sort: { 
+                    total: -1 
+                } 
+            },
+        ]
+        const aggregate = await db.aggregate(pipelines)
+        res.send({
+            expenses: data,
+            aggregate
+        })
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
+const graphByMonths = async (req, res, next, db) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const pipelines = [
+        {
+            $match: {
+                expense_source: {
+                    $ne: 'ora sal',
+                },
+                category: {
+                    $ne: 'investment',
+                },
+                details: {
+                    $nin: ignoredExpenses
+                }
+            },
+        },
+        {
+            $addFields: {
+                month: {
+                    $month: {
+                        date: '$date',
+                        timezone,
+                    },
+                },
+                year: {
+                    $year: {
+                        date: '$date',
+                        timezone,
+                    },
+                },
+            },
+        },
+        {
+            $group: {
+                _id: { month: '$month', year: '$year' },
+                total_expense: totalClause,
+                closing_balance: {$last: '$closing_balance'}
+            },
+        }, {
+            $sort: { 
+                '_id.year': 1,
+                '_id.month': 1
+            } 
+        }
+    ]
+    try {
+        res.send(await db.aggregate(pipelines))
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
+module.exports = {
+    getExpenses,
+    graphByMonths
+}

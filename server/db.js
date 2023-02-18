@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require('mongoose')
 
 const expenseSchema = new mongoose.Schema({
@@ -17,10 +18,9 @@ const expenseSchema = new mongoose.Schema({
 		default: Date.now,
 	},
 })
+const DB_HOST = process.env.DB_HOST
+const DB_NAME = process.env.DB_NAME
 const currentDate = '31/10/22'
-const currentYear = '20' + currentDate.split('/')[2]
-const currentMonth = currentDate.split('/')[1]
-const currentDay = currentDate.split('/')[0]
 const mockExpense = {
 	date: new Date('20' + currentDate.split('/')[2] + '/' + currentDate.split('/')[1] + '/' + currentDate.split('/')[0]),
 	details: 'UPI-ROLLA HYPER MARKET-ROLLAHYPERMARKET.42392290@HDFCBANK-HDFC0000001-230403568836-PAYMENT FROM PHONE',
@@ -34,11 +34,10 @@ const mockExpense = {
 	expense_source: 'rolla',
 	trx_type: 'debit',
 }
-new Date(2022)
 const Expense = mongoose.model('expenses', expenseSchema)
 
 const connect = async function () {
-	await mongoose.connect('mongodb://localhost:27017/finbot')
+	await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
 	// use `await mongoose.connect('mongodb://user:password@localhost:27017/test')` if your database has auth enabled
 }
 
@@ -60,35 +59,8 @@ const disconnect = async () => {
 	return mongoose.disconnect()
 }
 
-const aggregate = async (startDate, endDate) => {
-	return Expense.aggregate([
-		{
-			$match: {
-				expense_source: {
-					$ne: 'ora sal',
-				},
-				date: { $lt: new Date(endDate), $gt: new Date(startDate) },
-			},
-		},
-		{ 
-            $group: { 
-                _id: '$category', 
-                total: { 
-                    $sum: {
-                        $cond: [{
-                            $gt: ["$debit_amount", 0]
-                          }, "$debit_amount",
-                                {$multiply: [
-                            "$credit_amount",
-                            -1
-                          ]}
-                        ]
-                    }
-                } 
-            } 
-        },
-		{ $sort: { total: -1 } },
-	])
+const aggregate = async (pipelines) => {
+	return Expense.aggregate(pipelines)
 }
 
 // connect()

@@ -1,40 +1,49 @@
 const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
+const fs = require('fs')
+
 const db = require('./db')
-const { start } = require('repl')
+const importer = require('./importFileToDb')
+const { getExpenses, graphByMonths } = require('./route')
 const app = express()
 
-app.use(express.static(path.join(__dirname, '../client')))
+app.use(express.static(path.join(__dirname, '../client/dist')))
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/index.html'))
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'))
 })
-app.get('/expenses', async (req, res) => {
-    const query = req.query
-    const startDate = new Date(query.startDate)
-    const endDate = new Date(startDate).setMonth(startDate.getMonth() + 1)
-    console.log(startDate)
-    console.log(new Date(endDate))
-    try {
-        const data = await db.queryExpense({
-            date: {
-                $gte: startDate,
-                $lt: endDate
-            }
-        })
-        const aggregate = await db.aggregate(startDate, endDate)
-        res.send({
-            expenses: data,
-            aggregate
-        })
-    }
-    catch (e) {
-        res.status(500).send({
-            error: e.message
-        })
+app.get('/expenses',  (req, res, next) => getExpenses(req, res, next, db))
+app.get('/graphByMonths', (req, res, next) => graphByMonths(req, res, next, db))
+app.post('/importFile', (req, res) => {
+    const data = req.body.data
+    const fileName = req.body.fileName
+    db.bulkCreateExpense(importer.process(data, fileName))
+    .then((result) => {
+        console.log('expense added')
+        res.json({
+            success: true
+        })  
+    })
+    .catch((e) => {
         console.log(e)
-    }
+        res.json({
+            success: false,
+            details: e
+        })
+    })
+    .finally(() => {
+        if (fileName) {
+            try {
+                fs.renameSync(path.join(__dirname, './data/new', fileName), path.join(__dirname, './data/archive', fileName))
+            }
+            catch (e) {
+                console.log(e)
+            }
+        }
+    })
+    
 })
 app.listen(3000, async () => {
     try {
