@@ -11,6 +11,10 @@ const app = express()
 app.use(express.static(path.join(__dirname, '../client/dist')))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`)
+    next()
+})
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'))
 })
@@ -53,5 +57,5 @@ app.listen(3001, async () => {
     catch (e) {
         console.log(e)
     }
-    console.log('listening at port 3000 ...')
+    console.log('listening at port 3001 ...')
 })

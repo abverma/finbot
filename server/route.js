@@ -12,7 +12,6 @@ const totalClause = {
 }
 
 const getExpenses = async (req, res, next, db) => {
-    console.log(req.query)
     const startDate = new Date(req.query.startDate)
     const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
 
