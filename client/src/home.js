@@ -8,7 +8,8 @@ export default class HomePage extends React.Component {
 			filteredExpenses: [],
 			aggregates: [],
 			date: new Date().setDate(1),
-			total: 0
+			total: 0,
+			filter: []
 		}
 	}
 	componentDidMount() {
@@ -41,17 +42,35 @@ export default class HomePage extends React.Component {
 			})
 	}
 
-	handleSelectCategory (value) {
-		if (value) {
-			console.log('filter table by ' + value)
-			const filteredExpenses = Object.assign([], this.state.expenses).filter((x) => x.category == value)
-			this.setState((state) => ({
-				filteredExpenses
-			}))
-		} else {
-			this.setState((state) => ({
-				filteredExpenses: state.expenses
-			}))
+	handleSelectCategory (value, filter) {
+		if (filter) {
+			let filteredExpenses = this.state.expenses
+			let filterState = this.state.filter
+
+			if (value) {
+				filterState.push({
+					filter,
+					value
+				})
+				console.log('filter table by ' + value)
+			} else {
+				filterState = filterState.filter(x => x.filter !== filter)
+			}
+
+			if (filterState.length) {
+				filterState.forEach(f => {
+					filteredExpenses = Object.assign([], filteredExpenses).filter((x) => x[f.filter] == f.value)
+				})
+				this.setState((state) => ({
+					filteredExpenses: filteredExpenses,
+					filter: filterState
+				}))
+			} else {
+				this.setState((state) => ({
+					filteredExpenses: this.state.expenses,
+					filter: filterState
+				}))
+			}
 		}
 	}
 
@@ -75,13 +94,14 @@ export default class HomePage extends React.Component {
 						<option value='2022/11/01'>November 2022</option>
 						<option value='2022/12/01'>December 2022</option>
 						<option value='2023/01/01'>January 2023</option>
+						<option value='2023/02/01'>Feburary 2023</option>
 					</select>
 				</div>
 				<div id='summary' className='row p-2'>
 					<Summary aggregate={this.state.aggregate} dateString={this.state.date} total={this.state.total}></Summary>
 				</div>
 				<div id='expenseList' className='row p-2'>
-					<Table expenses={this.state.filteredExpenses} dateString={this.state.date} handleSelectCategory={(value) => this.handleSelectCategory(value)}></Table>
+					<Table expenses={this.state.filteredExpenses} dateString={this.state.date} handleSelectCategory={(value, filter) => this.handleSelectCategory(value, filter)}></Table>
 				</div>
 			</div>
 		)
@@ -103,6 +123,7 @@ function TRow(props) {
 			</td>
 			<td>{props.row.category}</td>
 			<td>{props.row.expense_source}</td>
+			<td>{props.row.source}</td>
 			<td className='text-wrap' style={{ width: 10 + 'rem' }}>
 				{props.row.details}
 			</td>
@@ -120,23 +141,37 @@ function Table(props) {
 	return (
 		<div className='card border-0 table-responsive shadow'>
 			<div className='card-header border-0 row white'>
-				<div className='col-md-3 col-12 justify-content-center'>
+				<div className='col-md-3 col-12 justify-content-center text-center mb-2'>
 					<h6 className='card-header-title h6 p-2 text-muted'>EXPENSES {' - ' + titleDateString}</h6>
 				</div>
-				<div className='col-md-2 col-12'>
-					<select id='selectCategory' className='form-select form-select-sm' onChange={(e) => props.handleSelectCategory(e.target.value)}>
-						<option defaultValue value=''>No filter</option>
-						<option value='amazon'>Amazon</option>
-						<option value='apparel'>Apparel</option>
-						<option value='baby'>Baby</option>
-						<option value='eating-out'>Eating-out</option>
-						<option value='entertainment'>Entertainment</option>
-						<option value='groceries'>Groceries</option>
-						<option value='investment'>Investment</option>
-						<option value='medical'>Medical</option>
-						<option value='misc'>Misc</option>
-						<option value='travel'>Travel</option>
-					</select>
+				<div className='col-md-4 col-12 row align-items-center'>
+					<label className='col-4'>Category</label>
+					<div className='col-8'>
+						<select id='selectCategory' className='form-select form-select-sm' onChange={(e) => props.handleSelectCategory(e.target.value, 'category')}>
+							<option defaultValue value=''>No filter</option>
+							<option value='amazon'>Amazon</option>
+							<option value='apparel'>Apparel</option>
+							<option value='baby'>Baby</option>
+							<option value='eating-out'>Eating-out</option>
+							<option value='entertainment'>Entertainment</option>
+							<option value='groceries'>Groceries</option>
+							<option value='investment'>Investment</option>
+							<option value='medical'>Medical</option>
+							<option value='misc'>Misc</option>
+							<option value='travel'>Travel</option>
+						</select>
+					</div>
+					
+				</div>
+				<div className='col-md-4 col-12 row align-items-center'>
+					<label className='col-4'>Expense Account</label>
+					<div className='col-8'>
+						<select id='selectSource' className='form-select form-select-sm' onChange={(e) => props.handleSelectCategory(e.target.value, 'source')}>
+							<option defaultValue value=''>No filter</option>
+							<option value='hdfc account'>HDFC</option>
+							<option value='icici credit card'>ICICI</option>
+						</select>
+					</div>
 				</div>
 			</div>
 			<table className='table card-body align-middle mb-0'>
@@ -158,6 +193,9 @@ function Table(props) {
 							Source
 						</th>
 						<th scope='col' className='text-muted'>
+							Expense Account
+						</th>
+						<th scope='col' className='text-muted'>
 							Details
 						</th>
 					</tr>
@@ -166,7 +204,7 @@ function Table(props) {
 					props.expenses.map((row, idx) => {
 						return <TRow key={idx} row={row} idx={idx + 1}></TRow>
 					})}	
-			</tbody>
+				</tbody>
 			</table>
 		</div>
 	)
@@ -177,7 +215,7 @@ function Summary(props) {
 
 	return (
 		<div className='row card mx-auto border-0 shadow'>
-			<div className='card-header border-0 white'>
+			<div className='card-header border-0 white text-center'>
 				<h6 className='card-header-title h6 p-2 text-muted '>SUMMARY { ' - ' + titleDateString}</h6>
 			</div>
 			<div className='card-body'>

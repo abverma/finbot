@@ -81,6 +81,9 @@ const graphByMonths = async (req, res, next, db) => {
                 },
                 details: {
                     $nin: ignoredExpenses
+                },
+                date: {
+                    $gt: new Date('2022-09-01')
                 }
             },
         },
