@@ -107,6 +107,7 @@ const graphByMonths = async (req, res, next, db) => {
             $group: {
                 _id: { month: '$month', year: '$year' },
                 total_expense: totalClause,
+                count: { $sum: 1},
                 closing_balance: {$last: '$closing_balance'}
             },
         }, {
