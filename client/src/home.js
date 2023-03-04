@@ -9,7 +9,7 @@ export default class HomePage extends React.Component {
 			aggregates: [],
 			date: new Date().setDate(1),
 			total: 0,
-			filter: []
+			filter: {}
 		}
 	}
 	componentDidMount() {
@@ -48,18 +48,15 @@ export default class HomePage extends React.Component {
 			let filterState = this.state.filter
 
 			if (value) {
-				filterState.push({
-					filter,
-					value
-				})
+				filterState[filter] = value
 				console.log('filter table by ' + value)
 			} else {
-				filterState = filterState.filter(x => x.filter !== filter)
+				delete filterState[filter]
 			}
 
-			if (filterState.length) {
-				filterState.forEach(f => {
-					filteredExpenses = Object.assign([], filteredExpenses).filter((x) => x[f.filter] == f.value)
+			if (Object.keys(filterState).length) {
+				Object.keys(filterState).forEach(key => {
+					filteredExpenses = Object.assign([], filteredExpenses).filter((x) => x[key] == filterState[key])
 				})
 				this.setState((state) => ({
 					filteredExpenses: filteredExpenses,
