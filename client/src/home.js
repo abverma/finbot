@@ -76,6 +76,8 @@ export default class HomePage extends React.Component {
 			await this.setState((state) => ({
 				date: e.target.value
 			}))
+			document.getElementById('selectCategory').value = ''
+			document.getElementById('selectSource').value = ''
 			this.fetchExpenses()
 		}
 	}
@@ -161,7 +163,7 @@ function Table(props) {
 					
 				</div>
 				<div className='col-md-4 col-12 row align-items-center'>
-					<label className='col-4'>Expense Account</label>
+					<label className='col-4'>Account</label>
 					<div className='col-8'>
 						<select id='selectSource' className='form-select form-select-sm' onChange={(e) => props.handleSelectCategory(e.target.value, 'source')}>
 							<option defaultValue value=''>No filter</option>
@@ -190,7 +192,7 @@ function Table(props) {
 							Source
 						</th>
 						<th scope='col' className='text-muted'>
-							Expense Account
+							Account
 						</th>
 						<th scope='col' className='text-muted'>
 							Details

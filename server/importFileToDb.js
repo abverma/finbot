@@ -10,24 +10,45 @@ const expenseDictionary = {
     'travel': ['ola', 'uber', 'vistara', 'indigo', 'airlines', 'thimmarayaswamy'],
     'investment': ['indian clearing corp', 'indianclearing'],
     'car-emi': ['racpc koramangala', 'sbi car loan'],
-    'eating-out': ['swiggy', 'crave by leena', 'starbucks'],
+    'eating-out': ['swiggy', 'crave by leena', 'starbucks', 'carrots'],
     'apparel': ['shoppers stop', 'shopperstop', 'pearl fancy store', 'mataji collection'],
     'baby': ['firstcry']
 }
 
+const miscSourceDictionary = {
+    'maintenance': ['MYGATE DUES SETTLE'],
+    'gail': ['UPI-GAIL GAS LIMITED'],
+    'indmoney': ['CTRAZORPAY-INDWEALTH'],
+    'urban company': ['URBANCOMPANY', 'URBAN COMPANY', 'URBANCLAP'],
+    'car service': ['NEXASERVICE'],
+    'atm withdrawal': ['EAW-512967XXXXXX5130'],
+    'office meal': ['SODEXO ORACLE SITE'],
+    'ikea': ['IKEA'],
+    'tailor': ['ISHHQ']
+}
+
 const tagCategory = (obj) => {
+    const desc = obj['details'].toLowerCase()
+
     Object.keys(expenseDictionary).forEach((idx) => {
-        const desc = obj['details'].toLowerCase()
         for (let j = 0; j < expenseDictionary[idx].length; j++) {
-            if (!obj['category'] && desc.includes(expenseDictionary[idx][j])) {
+            if (!obj['category'] && desc.toLowerCase().includes(expenseDictionary[idx][j].toLowerCase())) {
                 obj['category'] = idx
                 obj['expense_source'] = expenseDictionary[idx][j]
             }
         }
     })
     if (!obj['category']) {
-        obj['category'] = 'misc'
         obj['expense_source'] = ''
+
+        Object.keys(miscSourceDictionary).forEach((idx) => {
+            for (let j = 0; j < miscSourceDictionary[idx].length; j++) {
+                if (!obj['expense_source'] && desc.includes(miscSourceDictionary[idx][j])) {
+                    obj['expense_source'] = idx
+                }
+            }
+        })
+        obj['category'] = 'misc'
     }
 }
 
