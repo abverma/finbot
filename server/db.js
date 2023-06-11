@@ -17,6 +17,7 @@ const expenseSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now,
 	},
+	update_date: Date
 })
 const DB_HOST = process.env.DB_HOST
 const DB_NAME = process.env.DB_NAME
@@ -63,6 +64,10 @@ const aggregate = async (pipelines) => {
 	return Expense.aggregate(pipelines)
 }
 
+const updateExpense = async (query, updateObj) => {
+	return Expense.updateOne(query, updateObj)
+} 
+
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -82,8 +87,12 @@ const aggregate = async (pipelines) => {
 //     mongoose.disconnect()
 // })
 
-exports.connect = connect
-exports.bulkCreateExpense = bulkCreateExpense
-exports.disconnect = disconnect
-exports.queryExpense = queryExpense
-exports.aggregate = aggregate
+
+module.exports = {
+	connect,
+	bulkCreateExpense,
+	disconnect,
+	queryExpense,
+	aggregate,
+	updateExpense
+}

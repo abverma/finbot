@@ -2,7 +2,7 @@
 const expenseDictionary = {
     'groceries': ['rolla', 'lulu', 'ruchika', 'vegandukan', 'big basket'],
     'entertainment': ['xbox', 'netflix', 'zee5', 'hotstar', 'bookmyshow'],
-    'medical': ['prima', 'medical', 'ellan', 'max life ins', 'clinic', 'motherhood', 'hospital', 'dental', 'columbia asia'],
+    'medical': ['prima', 'medical', 'ellan', 'max life ins', 'clinic', 'motherhood', 'hospital', 'dental', 'columbia asia', 'upi-sheetal shrivastava'],
     'electricity': ['bangalore electricit-bescl', 'electricity', 'bescom'],
     'amazon': ['amazon'],
     'salary': ['ora sal'],
@@ -24,7 +24,8 @@ const miscSourceDictionary = {
     'atm withdrawal': ['EAW-512967XXXXXX5130'],
     'office meal': ['SODEXO ORACLE SITE'],
     'ikea': ['IKEA'],
-    'tailor': ['ISHHQ']
+    'tailor': ['ISHHQ'],
+    'office meal': ['UPI-SODEXO ORACLE']
 }
 
 const tagCategory = (obj) => {

@@ -5,7 +5,7 @@ const fs = require('fs')
 
 const db = require('./db')
 const importer = require('./importFileToDb')
-const { getExpenses, graphByMonths } = require('./route')
+const { getExpenses, graphByMonths, updateExpense } = require('./route')
 const app = express()
 
 app.use(express.static(path.join(__dirname, '../client/dist')))
@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'))
 })
 app.get('/expenses',  (req, res, next) => getExpenses(req, res, next, db))
+app.put('/expenses',  (req, res, next) => updateExpense(req, res, next, db))
 app.get('/graphByMonths', (req, res, next) => graphByMonths(req, res, next, db))
 app.post('/importFile', (req, res) => {
     const data = req.body.data

@@ -1,4 +1,4 @@
-const ignoredExpenses = [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593-FROM HDFC/]
+const ignoredExpenses = [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/]
 const totalClause = {
     $sum: {
         $cond: [
@@ -36,7 +36,7 @@ const getExpenses = async (req, res, next, db) => {
                         $lt: endDate
                     },
                     details: {
-                        $nin: [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593-FROM HDFC/]
+                        $nin: [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/]
                     }
                 },
             },
@@ -125,7 +125,30 @@ const graphByMonths = async (req, res, next, db) => {
     }
 }
 
+const updateExpense = async (req, res, next, db) => {
+    const id = req.query['_id']
+    const row = req.body
+    delete row['_id']
+    row['update_date'] = Date.now()
+    try {
+        const data = await db.updateExpense({
+            _id: id
+        }, row)
+
+        res.send({
+            expenses: data,
+        })
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
 module.exports = {
     getExpenses,
-    graphByMonths
+    graphByMonths,
+    updateExpense
 }
