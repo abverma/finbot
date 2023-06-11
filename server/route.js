@@ -14,13 +14,13 @@ const totalClause = {
 const getExpenses = async (req, res, next, db) => {
     const startDate = new Date(req.query.startDate)
     const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
-    
+    const dateClause =  {
+        $gte: startDate,
+        $lt: endDate
+    }
     try {
-        const data = await db.queryExpense({
-            date: {
-                $gte: startDate,
-                $lt: endDate
-            },
+        const expenses = await db.queryExpense({
+            date: dateClause,
             details: {
                 $nin: ignoredExpenses
             }
@@ -31,10 +31,7 @@ const getExpenses = async (req, res, next, db) => {
                     expense_source: {
                         $ne: 'ora sal',
                     },
-                    date: { 
-                        $gte: startDate,
-                        $lt: endDate
-                    },
+                    date: dateClause,
                     details: {
                         $nin: [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/]
                     }
@@ -52,9 +49,43 @@ const getExpenses = async (req, res, next, db) => {
             },
         ]
         const aggregate = await db.aggregate(pipelines)
+
+        const fixedPipelines = [
+            {
+                $match: {
+                    date: dateClause,
+                    details: {
+                        $nin: ignoredExpenses
+                    },
+                    $or: [{
+                        expense_source: {
+                            $in: ['maintenance', 'netflix', 'max life ins']
+                        },
+                    },
+                    {
+                        details: /EAW-512967XXXXXX5130/,
+                        debit_amount: 10000,
+                    }, {
+                        category: {
+                            $in: ['car-emi', 'phone', 'electricity']
+                        }
+                    }]
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: '$debit_amount'}
+                }
+            }
+        ]
+
+        const fixedExpenses = await db.aggregate(fixedPipelines)
+
         res.send({
-            expenses: data,
-            aggregate
+            expenses,
+            aggregate,
+            fixedExpenses
         })
     }
     catch (e) {
@@ -147,8 +178,59 @@ const updateExpense = async (req, res, next, db) => {
     }
 }
 
+const getFixedExpenses = async (req, res, next, db) => {
+    const startDate = new Date(req.query.startDate)
+    const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
+    try {
+        const pipelines = [
+            {
+                $match: {
+                    date: {
+                        $gte: startDate,
+                        $lt: endDate
+                    },
+                    details: {
+                        $nin: ignoredExpenses
+                    },
+                    $or: [{
+                        expense_source: {
+                            $in: ['maintenance', 'netflix', 'max life ins']
+                        },
+                    },
+                    {
+                        details: /EAW-512967XXXXXX5130/,
+                        debit_amount: 10000,
+                    }, {
+                        category: {
+                            $in: ['car-emi', 'phone', 'electricity']
+                        }
+                    }]
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    fixed_expenses: { $sum: '$debit_amount'}
+                }
+            }
+        ]
+
+        const data = await db.aggregate(pipelines)
+        res.send({
+            expenses: data
+        })
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
 module.exports = {
     getExpenses,
     graphByMonths,
-    updateExpense
+    updateExpense,
+    getFixedExpenses
 }

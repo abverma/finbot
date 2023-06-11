@@ -9,7 +9,7 @@ export default class HomePage extends React.Component {
 			aggregates: [],
 			date: new Date().setDate(1),
 			total: 0,
-			filter: {},
+			filter: {}
 		}
 	}
 	componentDidMount() {
@@ -24,6 +24,7 @@ export default class HomePage extends React.Component {
 			.then((data) => {
 				console.log(data)
 				let total = 0
+				const totalFixed = data.fixedExpenses.length ? data.fixedExpenses[0].total : 0
 
 				if (data.aggregate && data.aggregate.length) {
 					total = data.aggregate.reduce((sum, rec) => {
@@ -35,6 +36,7 @@ export default class HomePage extends React.Component {
 					filteredExpenses: data.expenses,
 					aggregate: data.aggregate,
 					total,
+					totalFixed
 				}))
 			})
 			.catch((e) => {
@@ -121,7 +123,7 @@ export default class HomePage extends React.Component {
 					</select>
 				</div>
 				<div id='summary' className='row p-2'>
-					<Summary aggregate={this.state.aggregate} dateString={this.state.date} total={this.state.total}></Summary>
+					<Summary aggregate={this.state.aggregate} dateString={this.state.date} total={this.state.total} totalFixed={this.state.totalFixed}></Summary>
 				</div>
 				<div id='expenseList' className='row p-2'>
 					<Table
@@ -207,6 +209,7 @@ function Table(props) {
 							<option value='investment'>Investment</option>
 							<option value='medical'>Medical</option>
 							<option value='misc'>Misc</option>
+							<option value='phone'>Phone</option>
 							<option value='travel'>Travel</option>
 						</select>
 					</div>
@@ -285,13 +288,25 @@ function Summary(props) {
 					  })
 					: ''}
 				{props.total ? (
-					<dl className='row mt-4'>
+					<dl className='row mt-4 mb-0'>
 						<dt className='col-md-2 col-6'>Total Expense</dt>
 						<dd className='col-md-10 col-6'>
 							{props.total.toLocaleString('en-IN', {
 								style: 'currency',
 								currency: 'INR',
-							})}
+							})} 
+						</dd>
+					</dl>
+				) : null}
+
+				{props.totalFixed ? (
+					<dl className='row'>
+						<dt className='col-md-2 col-6'>Fixed Expense</dt>
+						<dd className='col-md-10 col-6'>
+							{props.totalFixed.toLocaleString('en-IN', {
+								style: 'currency',
+								currency: 'INR',
+							})} (car emi, medical insurance, maid, netflix, phone, electricity)
 						</dd>
 					</dl>
 				) : null}
