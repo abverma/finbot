@@ -50,8 +50,8 @@ const createExpense = async (expense) => {
 	return Expense.create(expense)
 }
 
-const queryExpense = async (query, limit) => {
-	return Expense.find(query).sort({ date: 1 })
+const queryExpense = async (query, limit, sort) => {
+	return Expense.find(query).limit(limit).sort(sort || { date: 1 })
 }
 const deleteAllExpenses = async () => {
 	return Expense.deleteMany()

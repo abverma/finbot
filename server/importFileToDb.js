@@ -2,16 +2,16 @@
 const expenseDictionary = {
     'groceries': ['rolla', 'lulu', 'ruchika', 'vegandukan', 'big basket'],
     'entertainment': ['xbox', 'netflix', 'zee5', 'hotstar', 'bookmyshow'],
-    'medical': ['prima', 'medical', 'ellan', 'max life ins', 'clinic', 'motherhood', 'hospital', 'dental', 'columbia asia', 'upi-sheetal shrivastava'],
+    'medical': ['prima', 'medical', 'ellan', 'max life ins', 'clinic', 'motherhood', 'hospital', 'dental', 'columbia asia', 'upi-sheetal shrivastava', 'practo'],
     'electricity': ['bangalore electricit-bescl', 'electricity', 'bescom'],
     'amazon': ['amazon'],
     'salary': ['ora sal'],
     'phone': ['airtel'], 
-    'travel': ['ola', 'uber', 'vistara', 'indigo', 'airlines', 'thimmarayaswamy'],
+    'travel': ['ola', 'uber', 'vistara', 'indigo', 'airlines', 'thimmarayaswamy', 'fuel point', 'makemytrip'],
     'investment': ['indian clearing corp', 'indianclearing'],
     'car-emi': ['racpc koramangala', 'sbi car loan'],
-    'eating-out': ['swiggy', 'crave by leena', 'starbucks', 'carrots'],
-    'apparel': ['shoppers stop', 'shopperstop', 'pearl fancy store', 'mataji collection'],
+    'eating-out': ['swiggy', 'crave by leena', 'starbucks', 'carrots', 'spice klub'],
+    'apparel': ['shoppers stop', 'shopperstop', 'pearl fancy store', 'mataji collection', 'life style' , 'hennes n mauritz'],
     'baby': ['firstcry']
 }
 
@@ -20,12 +20,11 @@ const miscSourceDictionary = {
     'gail': ['UPI-GAIL GAS LIMITED'],
     'indmoney': ['CTRAZORPAY-INDWEALTH'],
     'urban company': ['URBANCOMPANY', 'URBAN COMPANY', 'URBANCLAP'],
-    'car service': ['NEXASERVICE'],
+    'car service': ['NEXASERVICE', 'UPI-NEXA SERVICE'],
     'atm withdrawal': ['EAW-512967XXXXXX5130'],
-    'office meal': ['SODEXO ORACLE SITE'],
+    'office meal': ['SODEXO ORACLE SITE', 'UPI-SODEXO ORACLE', 'NITHIN', 'DHEER', 'DATTA', 'PRANAVA', 'NAVEEN'],
     'ikea': ['IKEA'],
-    'tailor': ['ISHHQ'],
-    'office meal': ['UPI-SODEXO ORACLE']
+    'tailor': ['ISHHQ']
 }
 
 const tagCategory = (obj) => {
@@ -44,7 +43,7 @@ const tagCategory = (obj) => {
 
         Object.keys(miscSourceDictionary).forEach((idx) => {
             for (let j = 0; j < miscSourceDictionary[idx].length; j++) {
-                if (!obj['expense_source'] && desc.includes(miscSourceDictionary[idx][j])) {
+                if (!obj['expense_source'] && desc.includes(miscSourceDictionary[idx][j].toLowerCase())) {
                     obj['expense_source'] = idx
                 }
             }

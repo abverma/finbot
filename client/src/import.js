@@ -72,9 +72,20 @@ export default class ImportPage extends React.Component {
         })
     }
     render () {
-        return <div className="container p-3 m-auto">
-            <input type="file" id="fileUpload" name="upload"></input>
-            <button type="button" className="btn btn-primary" id="uploadBtn">Upload</button>
+        return <div className="container p-2">
+                <div className="row card border-0 shadow my-5">
+                    <div className="card-body">
+                        <h3 className="card-title">Import statements</h3>
+                        <div className="row g-2 justify-content-start">
+                            <div className="col-md-6 col-12">
+                                <input type="file" className="form-control" id="fileUpload" name="upload"></input>
+                            </div>
+                            <div className="col-md-2 col-12">
+                                <button type="button" className="form-control btn btn-primary" id="uploadBtn">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
     }
 }

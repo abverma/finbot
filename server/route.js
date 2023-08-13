@@ -1,4 +1,4 @@
-const ignoredExpenses = [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/]
+const ignoredExpenses = [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/, /ABHISHEK VERMA-NETBANK/]
 const totalClause = {
     $sum: {
         $cond: [
@@ -33,7 +33,7 @@ const getExpenses = async (req, res, next, db) => {
                     },
                     date: dateClause,
                     details: {
-                        $nin: [/ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/, /INFINITY PAYMENT RECEIVED, THANK YOU/, /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/, /ABHISHEK VERMA-ICIC-XXXXXXXX4593/, /UPI-RUCHIKA  SAINI-9410371779/]
+                        $nin: ignoredExpenses
                     }
                 },
             },
@@ -59,7 +59,7 @@ const getExpenses = async (req, res, next, db) => {
                     },
                     $or: [{
                         expense_source: {
-                            $in: ['maintenance', 'netflix', 'max life ins']
+                            $in: ['maintenance', 'netflix', 'max life ins', 'gail']
                         },
                     },
                     {
@@ -71,12 +71,6 @@ const getExpenses = async (req, res, next, db) => {
                         }
                     }]
                 }
-            },
-            {
-                $group: {
-                    _id: null,
-                    total: { $sum: '$debit_amount'}
-                }
             }
         ]
 
@@ -85,7 +79,38 @@ const getExpenses = async (req, res, next, db) => {
         res.send({
             expenses,
             aggregate,
-            fixedExpenses
+        })
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
+const getMonthBalance = async (req, res, next, db) => {
+    const startDate = new Date(req.query.startDate)
+    const endDate = new Date(startDate)
+    startDate.setDate(1)
+    endDate.setMonth(startDate.getMonth() + 1)
+    endDate.setDate(0)
+    const query =  {
+        date: {$gte: startDate},
+        source: 'hdfc account'
+    }
+    try {
+        const firstexpense = await db.queryExpense(query, 1)
+        console.log(firstexpense?.length ? firstexpense[0] : null)
+        query.date = {
+            $lte: endDate
+        }
+        const lastexpense = await db.queryExpense(query, 1, {_id: -1})
+        console.log(lastexpense?.length ? lastexpense[0] : null)
+
+        res.send({
+            opening_balance: firstexpense.length ? firstexpense[0].closing_balance : null,
+            closing_balance: lastexpense.length ? lastexpense[0].closing_balance : null
         })
     }
     catch (e) {
@@ -228,9 +253,51 @@ const getFixedExpenses = async (req, res, next, db) => {
     }
 }
 
+const searchExpenses = async (req, res, next, db) => {
+    try {
+        const searchParams = JSON.parse(req.query?.search)
+        const filter = {
+            $and: [],
+            $or: []
+        }
+        searchParams.forEach(q => {
+            const condition = {}
+            condition[q.query.field] = {}
+            condition[q.query.field][q.query.operator] = q.query.value
+
+            if (q.query.operator === '$regex') {
+                condition[q.query.field]['$options'] = 'i'
+            }
+            
+            if (!q.operand) {
+                q.operand = '$and'
+            }
+            filter[q.operand].push(condition)
+        })
+        if (!filter['$and'].length) {
+            delete filter['$and']
+        }
+        if (!filter['$or'].length) {
+            delete filter['$or']
+        }
+        console.log(JSON.stringify(filter))
+        const expenses = await db.queryExpense(filter)
+
+        res.send({expenses})
+    }
+    catch (e) {
+        res.status(500).send({
+            error: e.message
+        })
+        console.log(e)
+    }
+}
+
 module.exports = {
     getExpenses,
     graphByMonths,
     updateExpense,
-    getFixedExpenses
+    getFixedExpenses,
+    getMonthBalance,
+    searchExpenses
 }
