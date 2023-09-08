@@ -22,6 +22,8 @@ const expenseSchema = new mongoose.Schema({
 })
 const DB_HOST = process.env.DB_HOST
 const DB_NAME = process.env.DB_NAME
+const DB_USER = process.env.DB_USER
+const DB_PWD = process.env.DB_PWD
 const Expense = mongoose.model('expenses', expenseSchema)
 
 const Months = mongoose.model('list_of_months', {
@@ -42,8 +44,8 @@ const Accounts = mongoose.model('accounts', {
 })
 
 const connect = async function () {
-  await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
-  // use `await mongoose.connect('mongodb://user:password@localhost:27017 test')` if your database has auth enabled
+  // await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
+  await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
 }
 
 const bulkCreateExpense = async (expenses) => {
