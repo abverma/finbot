@@ -5,6 +5,8 @@ const ignoredExpenses = [
   /ABHISHEK VERMA-ICIC-XXXXXXXX4593/,
   /UPI-RUCHIKA {2}SAINI-9410371779/,
   /ABHISHEK VERMA-NETBANK/,
+  /AUTOPAY THANK YOU/,
+  /AUTOPAY/,
 ]
 const totalClause = {
   $sum: {
@@ -84,12 +86,10 @@ const getMonthBalance = async (req, res, next, db) => {
   }
   try {
     const firstexpense = await db.queryExpense(query, 1)
-    console.log(firstexpense?.length ? firstexpense[0] : null)
     query.date = {
       $lte: endDate,
     }
     const lastexpense = await db.queryExpense(query, 1, { _id: -1 })
-    console.log(lastexpense?.length ? lastexpense[0] : null)
 
     res.send({
       opening_balance: firstexpense.length

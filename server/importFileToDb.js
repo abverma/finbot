@@ -6,6 +6,8 @@ const expenseDictionary = {
     'vegandukan',
     'big basket',
     'innovative retail conc',
+    'the body shop',
+    'goel story',
   ],
   entertainment: ['xbox', 'netflix', 'zee5', 'hotstar', 'bookmyshow'],
   medical: [
@@ -22,6 +24,7 @@ const expenseDictionary = {
     'sheetal shrivastava',
     'practo',
     'diagnostic',
+    'shrivastava sheetal',
   ],
   electricity: ['bangalore electricit-bescl', 'electricity', 'bescom'],
   amazon: ['amazon'],
@@ -37,8 +40,14 @@ const expenseDictionary = {
     'fuel point',
     'makemytrip',
     'smartbuy flight',
+    'parking',
+    'irctc',
   ],
-  investment: ['indian clearing corp', 'indianclearing'],
+  investment: [
+    'indian clearing corp',
+    'indianclearing',
+    'bundl technologies pvt bangalore',
+  ],
   'car-emi': ['racpc koramangala', 'sbi car loan'],
   'eating-out': [
     'swiggy',
@@ -54,6 +63,8 @@ const expenseDictionary = {
     'mataji collection',
     'life style',
     'hennes n mauritz',
+    'metro brands',
+    'myntra',
   ],
   baby: ['firstcry', 'mother care'],
 }
@@ -73,6 +84,7 @@ const miscSourceDictionary = {
     'DATTA',
     'PRANAVA',
     'NAVEEN',
+    'ARCHIKA',
   ],
   ikea: ['IKEA'],
   tailor: ['ISHHQ'],
@@ -136,7 +148,12 @@ const process = (data, fileName, account) => {
     }
     row['source'] = account
     if (account === 'hdfc credit card') {
-      trx_type = row['transaction_type'] === 'Cr' ? 'credit' : 'debit'
+      if (row['transaction_type']) {
+        trx_type = row['transaction_type'] === 'Cr' ? 'credit' : 'debit'
+      } else {
+        trx_type = row['amount'].includes('Cr') ? 'credit' : 'debit'
+        row['amount'] = row['amount'].split(' Cr')[0]
+      }
       row['debit_amount'] = parseFloat(0)
       row['credit_amount'] = parseFloat(0)
 
@@ -145,6 +162,7 @@ const process = (data, fileName, account) => {
       } else {
         row['credit_amount'] = parseFloat(row['amount'].replace(',', ''))
       }
+      row['date'] = row['date'].split(' ')[0]
     } else if (account === 'hdfc account') {
       trx_type = parseFloat(row['debit_amount']) ? 'debit' : 'credit'
     } else if (account === 'icici credit card') {

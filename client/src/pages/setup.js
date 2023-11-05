@@ -43,6 +43,7 @@ function ImportComponent({ accountList }) {
   const [header, setHeader] = useState([])
   const [data, setData] = useState([])
   const [fileName, setFilename] = useState()
+  const [uploadSuccess, setUploadSuccess] = useState(false)
 
   function handleShow() {
     // eslint-disable-next-line no-undef
@@ -79,6 +80,9 @@ function ImportComponent({ accountList }) {
       header: true,
       skipEmptyLines: true,
       transformHeader: (header) => {
+        if (header.includes(' (in Rs.)')) {
+          header = header.split(' (in Rs.)')[0]
+        }
         if (header.includes('(INR)')) {
           header = header.split('(INR)')[0]
         }
@@ -105,29 +109,26 @@ function ImportComponent({ accountList }) {
   }
 
   function upload() {
-    const payload = Object.assign(
-      { fileName, account: accountName },
-      { data: csvJson.data }
-    )
-    console.log(JSON.stringify(csvJson.data))
+    const payload = Object.assign({ fileName, account: accountName }, { data })
+    // console.log(JSON.stringify(csvJson.data))
 
-    // fetch('/importFile', {
-    //   method: 'POST',
-    //   body: JSON.stringify(payload),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    //   .then(async (result) => {
-    //     console.log(await result.json())
-    //   })
-    //   .catch((e) => {
-    //     console.log(
-    //       new Error('Error uploading file', {
-    //         cause: e,
-    //       })
-    //     )
-    //   })
+    fetch('/importFile', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(async (result) => {
+        console.log(await result.json())
+      })
+      .catch((e) => {
+        console.log(
+          new Error('Error uploading file', {
+            cause: e,
+          })
+        )
+      })
   }
 
   function capitalizeFirstLetter(string) {
@@ -191,6 +192,7 @@ function ImportComponent({ accountList }) {
             </button>
           </div>
         </div>
+        {}
         <table className={header.length ? 'table mt-2' : 'table mt-2 d-none'}>
           <thead>
             <tr>

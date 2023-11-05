@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import HomePage from './home'
-import SetupPage from './setup'
-import AnalyticsPage from './analytics'
+import HomePage from './pages/home/home'
+import SetupPage from './pages/setup'
+import AnalyticsPage from './pages/analytics'
 
 class App extends React.Component {
   constructor(props) {
