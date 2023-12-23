@@ -265,7 +265,7 @@ export default function HomePage() {
   return (
     <div className="container p-3 m-auto">
       <div className="row justify-content-start align-items-center">
-        <div className="ps-0 col-4">
+        <div className="ps-0 col-10 col-md-4">
           <select
             id="selectMonth"
             className="form-select form-select-md m-2"
