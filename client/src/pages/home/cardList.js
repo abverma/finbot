@@ -11,14 +11,14 @@ export default function CardList(props) {
             </div>
             <div className="card-body">
               <div className="row justify-content-between">
-                <div className="col col-10 col-sm-8 align-self-start">
+                <div className="col-6 col-md-10 align-self-start">
                   <h5 className="card-text">
                     {row.category.charAt(0).toUpperCase() +
                       row.category.substr(1)}
                   </h5>
                   <p className="card-text">{row.details}</p>
                 </div>
-                <div className="col col-2 col-sm-4 align-items-start text-end">
+                <div className="col-6 col-md-2 align-items-start text-end">
                   <h5 className="card-title">
                     {(
                       row.credit_amount * -1 || row.debit_amount

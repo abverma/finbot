@@ -298,7 +298,7 @@ export default function HomePage() {
         ></SearchBar>
       </div>
       <div className="row">
-        <div className="col-4 me-1">
+        <div className="col-12 col-md-4 me-1">
           <Summary
             aggregate={aggregates}
             dateString={date}
