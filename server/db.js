@@ -34,7 +34,6 @@ const Months = mongoose.model('list_of_months', {
 
 const ExpenseCategories = mongoose.model('expense_categories', {
   category: String,
-  itmes: [String],
 })
 
 const Accounts = mongoose.model('accounts', {

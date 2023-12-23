@@ -2,6 +2,19 @@ import React from 'react'
 
 export default function Summary(props) {
   let titleDateString = ''
+  let iconMap = {
+    investment: 'bi-activity',
+    'car-emi': 'bi-car-front',
+    entertainment: 'bi-tv',
+    groceries: 'bi-basket',
+    phone: 'bi-telephone',
+    electricity: 'bi-lightning-charge',
+    travel: 'bi-airplane',
+    medical: 'bi-prescription',
+    'eating-out': 'bi-cup-hot',
+    misc: 'bi-question-lg',
+    amazon: 'bi-cart',
+  }
 
   if (props.dateString) {
     titleDateString =
@@ -11,8 +24,13 @@ export default function Summary(props) {
       new Date(props.dateString).getFullYear()
   }
 
+  function getIconClass(key) {
+    const iconClass = iconMap[key]
+    return iconClass ? `bi ${iconClass} px-2` : 'px-2'
+  }
+
   return (
-    <div className="row card mx-auto border-0 shadow">
+    <div className="row card border-0 shadow">
       <div className="card-header border-0 white text-center">
         <h6 className="card-header-title h6 p-2 text-muted ">
           SUMMARY {titleDateString}
@@ -23,13 +41,14 @@ export default function Summary(props) {
           ? props.aggregate.map((rec, idx) => {
               return (
                 <dl key={idx} className="row mb-1">
-                  <dt className="col-md-2 col-6">
+                  <dt className="col-6">
+                    <i className={getIconClass(rec._id)}></i>
                     {rec._id.replace(
                       rec._id.charAt(0),
                       rec._id.charAt(0).toUpperCase()
                     )}
                   </dt>
-                  <dd className="col-md-10 col-6">
+                  <dd className="col-6">
                     {rec.total.toLocaleString('en-IN', {
                       style: 'currency',
                       currency: 'INR',
@@ -41,8 +60,10 @@ export default function Summary(props) {
           : ''}
         {props.total ? (
           <dl className="row mt-4 mb-0">
-            <dt className="col-md-2 col-6">Total Expense</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-receipt px-2"></i>Total Expense
+            </dt>
+            <dd className="col-6">
               {props.total.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -53,8 +74,10 @@ export default function Summary(props) {
 
         {props.totalFixed ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6 text-primary">Fixed Expense</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-flag-fill px-2 text-primary"></i>Fixed Expense
+            </dt>
+            <dd className="col-6">
               {props.totalFixed.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -65,8 +88,11 @@ export default function Summary(props) {
 
         {props.totalNecessary ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6 text-success">Necessary Expense</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-flag-fill px-2 text-success"></i>Necessary
+              Expense
+            </dt>
+            <dd className="col-6">
               {props.totalNecessary.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -77,8 +103,11 @@ export default function Summary(props) {
 
         {props.totalAvoidable ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6 text-danger">Avoidable Expense</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-flag-fill px-2 text-danger"></i>Avoidable
+              Expense
+            </dt>
+            <dd className="col-6">
               {props.totalAvoidable.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -89,8 +118,11 @@ export default function Summary(props) {
 
         {props.totalDoesntHurt ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6 text-secondary">One-off Expense</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-flag-fill px-2 text-secondary"></i>One-off
+              Expense
+            </dt>
+            <dd className="col-6">
               {props.totalDoesntHurt.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -101,8 +133,10 @@ export default function Summary(props) {
 
         {props.credit ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6">Credit</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-arrow-up px-2"></i>Credit
+            </dt>
+            <dd className="col-6">
               {props.credit.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -113,8 +147,10 @@ export default function Summary(props) {
 
         {props.salary ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6">Salary</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-cash-stack px-2"></i>Salary
+            </dt>
+            <dd className="col-6">
               {props.salary.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -125,8 +161,10 @@ export default function Summary(props) {
 
         {props.openingBalance ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6">Opening Balance</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-wallet2 px-2"></i>Opening Balance
+            </dt>
+            <dd className="col-6">
               {props.openingBalance.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -137,8 +175,10 @@ export default function Summary(props) {
 
         {props.closingBalance ? (
           <dl className="row mb-0">
-            <dt className="col-md-2 col-6">Closing Balance</dt>
-            <dd className="col-md-10 col-6">
+            <dt className="col-6">
+              <i className="bi bi-wallet px-2"></i>Closing Balance
+            </dt>
+            <dd className="col-6">
               {props.closingBalance.toLocaleString('en-IN', {
                 style: 'currency',
                 currency: 'INR',

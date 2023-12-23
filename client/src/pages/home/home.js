@@ -1,7 +1,7 @@
 import React from 'react'
 import SearchBar from './search'
 import Summary from './summary'
-import Table from './table'
+import ExpenseList from './expenseList'
 import { useState, useEffect } from 'react'
 
 export default function HomePage() {
@@ -110,6 +110,7 @@ export default function HomePage() {
         .reduce((p, c) => p + c.credit_amount, 0)
     )
     setSalary(data.expenses.find((x) => x.category === 'salary')?.credit_amount)
+    setResetFilter(true)
   }
 
   function fetchMonthBalances() {
@@ -162,7 +163,7 @@ export default function HomePage() {
 
       expenses.forEach((expense) => {
         if (
-          ['massage'].includes(expense.expense_source) ||
+          expense.expense_source?.includes('massage') ||
           expense.expense_source?.includes('splurge')
         ) {
           expense['priority'] = 'avoidable'
@@ -239,16 +240,10 @@ export default function HomePage() {
   async function handleSelectMonth(e) {
     if (e.target.value) {
       setDate(e.target.value)
-      // document.getElementById('selectCategory').value = ''
-      // document.getElementById('selectSource').value = ''
-      // fetchExpenses()
-      // fetchMonthBalances()
     }
   }
 
   function handleSearch(criterias) {
-    console.log(`Search criteria:`)
-    console.log(JSON.stringify(criterias))
     searchExpenses(criterias)
     setDate('')
   }
@@ -265,11 +260,6 @@ export default function HomePage() {
 
   function refreshPage() {
     fetchExpenses()
-    resetFilterValue(true)
-  }
-
-  function resetFilterValue(value) {
-    setResetFilter(value)
   }
 
   return (
@@ -301,39 +291,41 @@ export default function HomePage() {
           ></i>
         </div>
       </div>
-      <div className="row p-2">
+      <div className="row pb-2">
         <SearchBar
           handleSearch={(c) => handleSearch(c)}
           handleClearSearch={() => handleClearSearch()}
         ></SearchBar>
       </div>
-      <div id="summary" className="row p-2">
-        <Summary
-          aggregate={aggregates}
-          dateString={date}
-          total={total}
-          totalFixed={totalFixed}
-          totalNecessary={totalNecessary}
-          totalAvoidable={totalAvoidable}
-          totalDoesntHurt={totalDoesntHurt}
-          credit={credit}
-          salary={salary}
-          openingBalance={openingBalance}
-          closingBalance={closingBalance}
-        ></Summary>
-      </div>
-      <div id="expenseList" className="row p-2">
-        <Table
-          expenses={filteredExpenses}
-          dateString={date}
-          handleSelectCategory={(value, filter) =>
-            handleSelectCategory(value, filter)
-          }
-          updateRow={(row) => updateRow(row)}
-          saveRow={(row) => saveRow(row)}
-          resetFilter={resetFilter}
-          resetFilterValue={(value) => resetFilterValue(value)}
-        ></Table>
+      <div className="row">
+        <div className="col-4 me-1">
+          <Summary
+            aggregate={aggregates}
+            dateString={date}
+            total={total}
+            totalFixed={totalFixed}
+            totalNecessary={totalNecessary}
+            totalAvoidable={totalAvoidable}
+            totalDoesntHurt={totalDoesntHurt}
+            credit={credit}
+            salary={salary}
+            openingBalance={openingBalance}
+            closingBalance={closingBalance}
+          ></Summary>
+        </div>
+        <div className="col p-0">
+          <ExpenseList
+            expenses={filteredExpenses}
+            dateString={date}
+            handleSelectCategory={(value, filter) =>
+              handleSelectCategory(value, filter)
+            }
+            updateRow={(row) => updateRow(row)}
+            saveRow={(row) => saveRow(row)}
+            resetFilter={resetFilter}
+            setResetFilter={setResetFilter}
+          ></ExpenseList>
+        </div>
       </div>
     </div>
   )

@@ -54,9 +54,15 @@ function ImportComponent({ accountList }) {
       setError(true)
       return
     }
-    reader.readAsText(file, 'utf-8')
+    if (file.type == 'text/csv') {
+      reader.readAsText(file, 'utf-8')
+    } else if (file.type == 'application/pdf') {
+      readPdfHandler(file)
+    }
     reader.onload = (e) => {
-      readHandler(e)
+      if (file.type == 'text/csv') {
+        readCsvHandler(e)
+      }
     }
   }
 
@@ -67,12 +73,31 @@ function ImportComponent({ accountList }) {
     }
   }
 
-  function readHandler(e) {
-    const file = e.target.result
+  function readPdfHandler(file) {
+    const formData = new FormData(document.getElementById('myForm'))
+    fetch('convertPdf', {
+      method: 'PUT',
+      body: formData,
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then(({ header, rows }) => {
+        setHeader(header)
+        setData(rows)
+      })
+      .catch((e) => {
+        console.log('Unable to parse pdf file. ', e)
+      })
+  }
+
+  function readCsvHandler(e) {
+    let file = e.target.result
     let csvString = ''
+    const lines = skipUseLessLines(accountName, file)
     // This is a regular expression to identify carriage
     // Returns and line breaks
-    const lines = file.split(/\r\n|\n/)
+    // const lines = file.split(/\r\n|\n/)
     csvString += lines.join('\n')
     const csvJson = Papa.parse(csvString, {
       delimiter: ',',
@@ -105,7 +130,16 @@ function ImportComponent({ accountList }) {
     })
     setHeader(csvJson?.meta?.fields.filter((x) => x !== ''))
     setData(csvJson.data)
-    console.log(JSON.stringify(csvJson.data))
+  }
+
+  function skipUseLessLines(accountName, file) {
+    console.log('skip useless lines')
+    if (accountName == 'icici credit card') {
+      file = file.split('Transaction Details')[1]
+      const idx = file.search('\n')
+      file = file.substr(idx + 1)
+    }
+    return file.split(/\r\n|\n/)
   }
 
   function upload() {
@@ -118,17 +152,13 @@ function ImportComponent({ accountList }) {
       headers: {
         'Content-Type': 'application/json',
       },
+    }).catch((e) => {
+      console.log(
+        new Error('Error uploading file', {
+          cause: e,
+        })
+      )
     })
-      .then(async (result) => {
-        console.log(await result.json())
-      })
-      .catch((e) => {
-        console.log(
-          new Error('Error uploading file', {
-            cause: e,
-          })
-        )
-      })
   }
 
   function capitalizeFirstLetter(string) {
@@ -160,7 +190,7 @@ function ImportComponent({ accountList }) {
           </div>
         </div>
         <div className="row g-2 justify-content-start">
-          <div className="col-md-6 col-12">
+          <form className="col-md-6 col-12" id="myForm">
             <input
               type="file"
               className="form-control"
@@ -168,7 +198,7 @@ function ImportComponent({ accountList }) {
               name="upload"
               disabled={!isAccountSelected}
             ></input>
-          </div>
+          </form>
           <div className="col-md-1 col-12">
             <button
               type="button"
@@ -313,7 +343,6 @@ function MonthList() {
       field,
       value,
     })
-    console.log(changedIdList.current)
   }
 
   return (
@@ -470,7 +499,6 @@ function AccountList({ accountList, dispatch }) {
       field,
       value,
     })
-    console.log(changedIdList.current)
   }
 
   return (
@@ -571,8 +599,8 @@ function monthListReducer(monthList, action) {
       return action.data
     case 'add':
       return [
-        ...monthList,
         { value: action.value, label: action.label, enabled: action.enabled },
+        ...monthList,
       ]
     case 'change':
       return monthList.map((item, idx) => {

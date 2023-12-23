@@ -17,7 +17,6 @@ class App extends React.Component {
 
     const setupLink = document.getElementById('setupLink')
     setupLink.addEventListener('click', async () => {
-      console.log('click import')
       await this.setState({
         currentPage: 'SetupPage',
       })
@@ -34,7 +33,6 @@ class App extends React.Component {
 
     const analyticsLink = document.getElementById('analyticsLink')
     analyticsLink.addEventListener('click', async () => {
-      console.log('click analytics')
       await this.setState({
         currentPage: 'AnalyticsPage',
       })

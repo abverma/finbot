@@ -3,9 +3,18 @@ const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
 const fs = require('fs')
+const multer = require('multer')
 
 const db = require('./db')
 const importer = require('./importFileToDb')
+const uploadDestination = './data/new'
+const storage = multer.diskStorage({
+  destination: uploadDestination,
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  },
+})
+const upload = multer({ storage })
 const {
   getExpenses,
   graphByMonths,
@@ -21,6 +30,7 @@ const {
   addAccount,
   updateAccounts,
 } = require('./route')
+const { convert } = require('./readFile')
 const app = express()
 
 app.use(express.static(path.join(__dirname, '../client/dist')))
@@ -77,12 +87,23 @@ app.get('/searchExpenses', (req, res, next) =>
 app.get('/monthList', (req, res, next) => getMonthList(req, res, next, db))
 app.post('/monthList', (req, res, next) => addToMonthList(req, res, next, db))
 app.put('/monthList', (req, res, next) => updateMonthList(req, res, next, db))
-app.get('/getExpenseCategories', (req, res, next) =>
+app.get('/expenseCategories', (req, res, next) =>
   getExpenseCategories(req, res, next, db)
 )
 app.get('/accounts', (req, res, next) => getAccounts(req, res, next, db))
 app.post('/accounts', (req, res, next) => addAccount(req, res, next, db))
 app.put('/accounts', (req, res, next) => updateAccounts(req, res, next, db))
+app.put('/convertPdf', upload.any(), async (req, res) => {
+  try {
+    const file = req.files[0]
+    const csvData = await convert(file.path)
+    res.send(csvData)
+  } catch (e) {
+    console.log(e)
+    res.status(500)
+    res.send(e)
+  }
+})
 
 app.listen(3001, async () => {
   try {

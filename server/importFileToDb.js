@@ -43,11 +43,7 @@ const expenseDictionary = {
     'parking',
     'irctc',
   ],
-  investment: [
-    'indian clearing corp',
-    'indianclearing',
-    'bundl technologies pvt bangalore',
-  ],
+  investment: ['indian clearing corp', 'indianclearing'],
   'car-emi': ['racpc koramangala', 'sbi car loan'],
   'eating-out': [
     'swiggy',
@@ -55,6 +51,7 @@ const expenseDictionary = {
     'starbucks',
     'carrots',
     'spice klub',
+    'bundl technologies',
   ],
   apparel: [
     'shoppers stop',
@@ -152,7 +149,7 @@ const process = (data, fileName, account) => {
         trx_type = row['transaction_type'] === 'Cr' ? 'credit' : 'debit'
       } else {
         trx_type = row['amount'].includes('Cr') ? 'credit' : 'debit'
-        row['amount'] = row['amount'].split(' Cr')[0]
+        row['amount'] = row['amount'].split('Cr')[0]
       }
       row['debit_amount'] = parseFloat(0)
       row['credit_amount'] = parseFloat(0)
