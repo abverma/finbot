@@ -297,8 +297,8 @@ export default function HomePage() {
           handleClearSearch={() => handleClearSearch()}
         ></SearchBar>
       </div>
-      <div className="row">
-        <div className="col-12 col-md-4 me-1">
+      <div className="row gx-5 gy-2">
+        <div className="col-12 col-md-4">
           <Summary
             aggregate={aggregates}
             dateString={date}
@@ -313,7 +313,7 @@ export default function HomePage() {
             closingBalance={closingBalance}
           ></Summary>
         </div>
-        <div className="col p-0">
+        <div className="col-12 col-md-8">
           <ExpenseList
             expenses={filteredExpenses}
             dateString={date}

@@ -24,16 +24,16 @@ export default function CardList(props) {
     }
   }
   return (
-    <div>
+    <div className="p-0">
       {props.expenses.map((row, idx) => {
         return (
           <div className="card m-1" key={idx}>
-            <div className="card-header text-bg-secondary">
+            <div className="card-header">
               {new Date(row.date).toDateString()}
             </div>
             <div className="card-body">
               <div className="row justify-content-between">
-                <div className="col-6 col-md-10 align-self-start">
+                <div className="col-6 col-md-6 align-self-start">
                   <select
                     className="form-control form-select card-text mb-1"
                     value={row.category}
@@ -57,14 +57,14 @@ export default function CardList(props) {
                   ></input>
                 </div>
                 <div className="col-6 col-md-2 align-items-start text-end">
-                  <h5 className="card-title">
+                  <h6 className="card-title">
                     {(
                       row.credit_amount * -1 || row.debit_amount
                     ).toLocaleString('en-IN', {
                       style: 'currency',
                       currency: 'INR',
                     })}
-                  </h5>
+                  </h6>
                 </div>
               </div>
               <p className="ps-1 card-text align-self-end">
