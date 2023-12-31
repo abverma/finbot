@@ -20,12 +20,33 @@ const prepareHeader = (header) => {
       header.splice(idx, 1)
     }
   }
-  return header
+  return header.map(transformHeader)
+}
+
+const transformHeader = (header) => {
+  if (header.includes(' (in Rs.)')) {
+    header = header.split(' (in Rs.)')[0]
+  }
+  if (header.includes('(INR)')) {
+    header = header.split('(INR)')[0]
+  }
+  if (header.includes('Transaction Date')) {
+    header = 'Date'
+  }
+
+  if (header.includes('Narration') || header.includes('Description')) {
+    header = 'Details'
+  }
+
+  if (header.includes('Ref Number')) {
+    header = 'Reference Number'
+  }
+  return header.toLowerCase().trim().replace(' ', '_')
 }
 
 exports.convert = (file) => {
   const rows = []
-  let row = []
+  let row = {}
   let dataBuffer = fs.readFileSync(file)
   return new Promise((resolve, reject) => {
     pdf(dataBuffer)
@@ -57,7 +78,7 @@ exports.convert = (file) => {
           statementPages[1].shift()
         }
         statementPages.forEach((page) => {
-          row = row.splice()
+          row = {}
           page.forEach((line) => {
             line = line.trimEnd()
             let timeMatch = timePattern.exec(line)
@@ -66,23 +87,23 @@ exports.convert = (file) => {
             const matchedPattern = timeMatch || dateMatch
 
             if (matchedPattern) {
-              row.push(line.slice(0, matchedPattern.index + indexJump))
+              row[header[1]] = line.slice(0, matchedPattern.index + indexJump)
               const tail = line.slice(
                 matchedPattern.index + indexJump,
                 line.length
               )
               currencyMatch = currencyPattern.exec(tail)
               if (currencyMatch) {
-                row.push(tail.slice(0, currencyMatch.index).trim())
-                row[row.length - 1] = row[row.length - 1].replaceAll('  ', '')
-                row.push(tail.slice(currencyMatch.index, tail.length))
+                row[header[2]] = tail.slice(0, currencyMatch.index).trim()
+                row[header[2]] = row[header[2]].replaceAll('  ', ' ')
+                row[header[3]] = tail.slice(currencyMatch.index, tail.length)
                 //todo: handle credit
 
                 rows.push(row)
-                row = row.splice()
+                row = {}
               }
             } else {
-              row.push(line)
+              row[header[0]] = line
             }
           })
         })

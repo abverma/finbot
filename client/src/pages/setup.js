@@ -91,6 +91,27 @@ function ImportComponent({ accountList }) {
       })
   }
 
+  function transformHeader(header) {
+    if (header.includes(' (in Rs.)')) {
+      header = header.split(' (in Rs.)')[0]
+    }
+    if (header.includes('(INR)')) {
+      header = header.split('(INR)')[0]
+    }
+    if (header.includes('Transaction Date')) {
+      header = 'Date'
+    }
+
+    if (header.includes('Narration') || header.includes('Description')) {
+      header = 'Details'
+    }
+
+    if (header.includes('Ref Number')) {
+      header = 'Reference Number'
+    }
+    return header.toLowerCase().trim().replace(' ', '_')
+  }
+
   function readCsvHandler(e) {
     let file = e.target.result
     let csvString = ''
@@ -104,26 +125,7 @@ function ImportComponent({ accountList }) {
       encoding: 'utf-8',
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => {
-        if (header.includes(' (in Rs.)')) {
-          header = header.split(' (in Rs.)')[0]
-        }
-        if (header.includes('(INR)')) {
-          header = header.split('(INR)')[0]
-        }
-        if (header.includes('Transaction Date')) {
-          header = 'Date'
-        }
-
-        if (header.includes('Narration') || header.includes('Description')) {
-          header = 'Details'
-        }
-
-        if (header.includes('Ref Number')) {
-          header = 'Reference Number'
-        }
-        return header.toLowerCase().trim().replace(' ', '_')
-      },
+      transformHeader: transformHeader,
       transform: (value) => {
         return value.trim()
       },
@@ -136,8 +138,10 @@ function ImportComponent({ accountList }) {
     console.log('skip useless lines')
     if (accountName == 'icici credit card') {
       file = file.split('Transaction Details')[1]
-      const idx = file.search('\n')
-      file = file.substr(idx + 1)
+      if (file) {
+        const idx = file.search('\n')
+        file = file.substr(idx + 1)
+      }
     }
     return file.split(/\r\n|\n/)
   }
@@ -152,13 +156,21 @@ function ImportComponent({ accountList }) {
       headers: {
         'Content-Type': 'application/json',
       },
-    }).catch((e) => {
-      console.log(
-        new Error('Error uploading file', {
-          cause: e,
-        })
-      )
     })
+      .then((resp) => {
+        if (resp.ok) {
+          setHeader([])
+          setData([])
+          setUploadSuccess(true)
+        }
+      })
+      .catch((e) => {
+        console.log(
+          new Error('Error uploading file', {
+            cause: e,
+          })
+        )
+      })
   }
 
   function capitalizeFirstLetter(string) {
@@ -222,7 +234,13 @@ function ImportComponent({ accountList }) {
             </button>
           </div>
         </div>
-        {}
+        <div className="p-5">
+          {uploadSuccess ? (
+            <div className="text-success text-center">Upload Success</div>
+          ) : (
+            ''
+          )}
+        </div>
         <table className={header.length ? 'table mt-2' : 'table mt-2 d-none'}>
           <thead>
             <tr>

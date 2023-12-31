@@ -33,28 +33,32 @@ export default function CardList(props) {
             </div>
             <div className="card-body">
               <div className="row justify-content-between">
-                <div className="col-6 col-md-6 align-self-start">
-                  <select
-                    className="form-control form-select card-text mb-1"
-                    value={row.category}
-                    onChange={(e) => onChange(e, row, 'category')}
-                  >
-                    {props.expenseCategories.map((x) => (
-                      <option value={x.category} key={x._id}>
-                        {x.category.replace(
-                          x.category.charAt(0),
-                          x.category.charAt(0).toUpperCase()
-                        )}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={row.expense_source}
-                    className="form-control mb-1 card-text"
-                    onChange={(e) => onChange(e, row, 'expense_source')}
-                    onKeyUp={(e) => onKeyUp(e, row, 'expense_source')}
-                  ></input>
+                <div className="col-6 col-md-6  align-self-start row">
+                  <div className="col-6">
+                    <select
+                      className="form-control form-select card-text mb-1"
+                      value={row.category}
+                      onChange={(e) => onChange(e, row, 'category')}
+                    >
+                      {props.expenseCategories.map((x) => (
+                        <option value={x.category} key={x._id}>
+                          {x.category.replace(
+                            x.category.charAt(0),
+                            x.category.charAt(0).toUpperCase()
+                          )}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-6">
+                    <input
+                      type="text"
+                      value={row.expense_source}
+                      className="form-control mb-1 card-text"
+                      onChange={(e) => onChange(e, row, 'expense_source')}
+                      onKeyUp={(e) => onKeyUp(e, row, 'expense_source')}
+                    ></input>
+                  </div>
                 </div>
                 <div className="col-6 col-md-2 align-items-start text-end">
                   <h6 className="card-title">
