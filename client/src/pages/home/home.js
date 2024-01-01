@@ -130,15 +130,30 @@ export default function HomePage() {
   function tagExpenses(expenses) {
     if (expenses.length) {
       expenses.forEach((expense) => {
+        let fixedFlag = false
+        const fixeds = [
+          'maintenance',
+          'netflix',
+          'max life ins',
+          'maid',
+          'gail',
+        ]
+        for (let i = 0; i < fixeds.length; i++) {
+          if (expense.expense_source.includes(fixeds[i])) {
+            fixedFlag = true
+            break
+          }
+        }
+        if (
+          !fixedFlag &&
+          ['car-emi', 'phone', 'electricity'].includes(expense.category)
+        ) {
+          fixedFlag = true
+        }
         if (
           expense.expense_source !== 'loan' &&
           expense.trx_type !== 'credit' &&
-          (['maintenance', 'netflix', 'max life ins', 'maid', 'gail'].includes(
-            expense.expense_source
-          ) ||
-            (expense.details.includes('EAW-512967XXXXXX5130') &&
-              expense.debit_amount === 10000) ||
-            ['car-emi', 'phone', 'electricity'].includes(expense.category))
+          fixedFlag
         ) {
           expense['priority'] = 'fixed'
         }
