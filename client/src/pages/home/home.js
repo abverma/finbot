@@ -135,11 +135,12 @@ export default function HomePage() {
           'maintenance',
           'netflix',
           'max life ins',
+          'maxlife',
           'maid',
           'gail',
         ]
         for (let i = 0; i < fixeds.length; i++) {
-          if (expense.expense_source.includes(fixeds[i])) {
+          if (expense.expense_source.toLowerCase().includes(fixeds[i])) {
             fixedFlag = true
             break
           }
@@ -161,7 +162,7 @@ export default function HomePage() {
 
       expenses.forEach((expense) => {
         if (
-          (expense.expense_source !== 'max life ins' &&
+          (!expense.priority &&
             expense.trx_type !== 'credit' &&
             ['groceries', 'medical'].includes(expense.category)) ||
           [

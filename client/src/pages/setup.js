@@ -4,7 +4,9 @@ import { useState, useEffect, useReducer, useRef } from 'react'
 
 export default function SetupPage() {
   const [accountList, dispatch] = useReducer(accountListReducer, [])
-
+  const [toastMessage, setToastMessage] = useState('')
+  const toast = document.getElementById('liveToast')
+  const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast)
   useEffect(() => {
     fetch('/accounts')
       .then((data) => data.json())
@@ -19,31 +21,104 @@ export default function SetupPage() {
       })
   }, [])
 
+  function showToastMessage(msg) {
+    setToastMessage(msg)
+    toastBootstrap.show()
+  }
+
   return (
     <div className="container p-2">
-      <ImportComponent accountList={accountList}></ImportComponent>
-      <div className="row card border-0 shadow my-5">
-        <div className="card-body">
-          <h3 className="card-title">Setup</h3>
+      <div class="toast-container fixed-bottom p-3">
+        <div
+          id="liveToast"
+          class="toast"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="d-flex">
+            <div class="toast-body">{toastMessage}</div>
+            <button
+              type="button"
+              class="btn-close me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
         </div>
-        <MonthList></MonthList>
-        <AccountList
-          accountList={accountList}
-          dispatch={dispatch}
-        ></AccountList>
+      </div>
+      <ul className="nav nav-tabs" id="myTab" role="tablist">
+        <li className="nav-item" role="presentation">
+          <button
+            className="nav-link active"
+            id="home-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#home-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="home-tab-pane"
+            aria-selected="true"
+          >
+            Import
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className="nav-link"
+            id="profile-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#profile-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="profile-tab-pane"
+            aria-selected="false"
+          >
+            Metadata
+          </button>
+        </li>
+      </ul>
+      <div className="tab-content" id="myTabContent">
+        <div
+          className="tab-pane fade show active"
+          id="home-tab-pane"
+          role="tabpanel"
+          aria-labelledby="home-tab"
+          tabindex="0"
+        >
+          <ImportComponent
+            accountList={accountList}
+            showToastMessage={showToastMessage}
+          ></ImportComponent>
+        </div>
+        <div
+          className="tab-pane fade"
+          id="profile-tab-pane"
+          role="tabpanel"
+          aria-labelledby="profile-tab"
+          tabindex="0"
+        >
+          <div className="card border-0 shadow my-2 p-2">
+            <div className="card-body">
+              <MonthList showToastMessage={showToastMessage}></MonthList>
+              <AccountList
+                accountList={accountList}
+                dispatch={dispatch}
+              ></AccountList>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-function ImportComponent({ accountList }) {
+function ImportComponent({ accountList, showToastMessage }) {
   const [error, setError] = useState(false)
   const [isAccountSelected, setIsAccountSelected] = useState(false)
   const [accountName, setAccountName] = useState()
   const [header, setHeader] = useState([])
   const [data, setData] = useState([])
   const [fileName, setFilename] = useState()
-  const [uploadSuccess, setUploadSuccess] = useState(false)
 
   function handleShow() {
     // eslint-disable-next-line no-undef
@@ -161,7 +236,7 @@ function ImportComponent({ accountList }) {
         if (resp.ok) {
           setHeader([])
           setData([])
-          setUploadSuccess(true)
+          showToastMessage('Uploaded successfully.')
         }
       })
       .catch((e) => {
@@ -170,6 +245,7 @@ function ImportComponent({ accountList }) {
             cause: e,
           })
         )
+        showToastMessage('Uploaded failed.')
       })
   }
 
@@ -178,9 +254,9 @@ function ImportComponent({ accountList }) {
   }
 
   return (
-    <div className="row card border-0 shadow my-5">
+    <div className="card border-0 shadow my-2 p-2">
       <div className="card-body">
-        <h3 className="card-title">Import statements</h3>
+        <h4 className="card-title">Import statements</h4>
         {error ? (
           <p className="text-danger">Error: Check the file selected</p>
         ) : null}
@@ -234,13 +310,6 @@ function ImportComponent({ accountList }) {
             </button>
           </div>
         </div>
-        <div className="p-5">
-          {uploadSuccess ? (
-            <div className="text-success text-center">Upload Success</div>
-          ) : (
-            ''
-          )}
-        </div>
         <table className={header.length ? 'table mt-2' : 'table mt-2 d-none'}>
           <thead>
             <tr>
@@ -274,13 +343,18 @@ function ImportComponent({ accountList }) {
   )
 }
 
-function MonthList() {
+function MonthList({ showToastMessage }) {
   const [monthList, dispatch] = useReducer(monthListReducer, [])
   const changedIdList = useRef([])
   const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
-    fetch('/monthList?limit=10')
+    fetchMonthList()
+  }, [page])
+
+  function fetchMonthList() {
+    fetch(`/monthList?start=${(page - 1) * 10}&limit=10`)
       .then((data) => data.json())
       .then((data) => {
         setTotal(data.count)
@@ -292,7 +366,7 @@ function MonthList() {
       .catch((e) => {
         console.log(e)
       })
-  }, [])
+  }
 
   function addRow() {
     dispatch({
@@ -325,9 +399,12 @@ function MonthList() {
         'Content-Type': 'application/json',
       },
     })
-      .then(() => {})
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
       .catch((e) => {
         console.log(e)
+        showToastMessage('Could not save.')
       })
   }
 
@@ -342,9 +419,12 @@ function MonthList() {
         'Content-Type': 'application/json',
       },
     })
-      .then(() => {})
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
       .catch((e) => {
         console.log(e)
+        showToastMessage('Could not save.')
       })
   }
 
@@ -361,6 +441,10 @@ function MonthList() {
       field,
       value,
     })
+  }
+
+  function next() {
+    setPage(page + 1)
   }
 
   return (
@@ -438,7 +522,7 @@ function MonthList() {
           <button className="btn border me-1" type="button">
             <i className="bi bi-chevron-left"></i>
           </button>
-          <button className="btn border" type="button">
+          <button className="btn border" type="button" onClick={(e) => next()}>
             <i className="bi bi-chevron-right"></i>
           </button>
         </div>

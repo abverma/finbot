@@ -8,6 +8,7 @@ export default function CardList(props) {
         return (
           <Card
             key={idx}
+            index={idx}
             row={row}
             expenseCategories={props.expenseCategories}
             updateRow={props.updateRow}
@@ -19,7 +20,7 @@ export default function CardList(props) {
   )
 }
 
-function Card({ row, expenseCategories, updateRow, saveRow }) {
+function Card({ row, expenseCategories, updateRow, saveRow, index }) {
   const [isEdit, setIsEdit] = useState(false)
 
   function onChange(e, row, rowKey) {
@@ -48,8 +49,10 @@ function Card({ row, expenseCategories, updateRow, saveRow }) {
   return (
     <div className="card m-1">
       <div className="card-header">
-        <div className="row align-items-between">
-          <div className="col">{new Date(row.date).toDateString()}</div>
+        <div className="row align-items-start">
+          <div className="col">{`#${index + 1}   ${new Date(
+            row.date
+          ).toDateString()}`}</div>
           <div className="col text-end">
             {isEdit ? (
               <i

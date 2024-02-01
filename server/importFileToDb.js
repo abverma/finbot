@@ -25,6 +25,7 @@ const expenseDictionary = {
     'practo',
     'diagnostic',
     'shrivastava sheetal',
+    'maxlife',
   ],
   electricity: ['bangalore electricit-bescl', 'electricity', 'bescom'],
   amazon: ['amazon'],

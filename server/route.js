@@ -286,7 +286,11 @@ const searchExpenses = async (req, res, next, db) => {
 
 const getMonths = async (req, res, next, db) => {
   try {
-    const result = await db.queryMonths(req.query, req.query.limit)
+    const result = await db.queryMonths(
+      req.query,
+      req.query.start,
+      req.query.limit
+    )
     const count = await db.getTotalMonths({})
     res.send({
       data: result,

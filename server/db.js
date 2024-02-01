@@ -78,8 +78,8 @@ const updateExpense = async (query, updateObj) => {
   return Expense.updateOne(query, updateObj)
 }
 
-const queryMonths = async (query, limit = 25) => {
-  return Months.find(query).limit(limit).sort({ _id: -1 })
+const queryMonths = async (query, start = 0, limit = 25) => {
+  return Months.find(query).skip(start).limit(limit).sort({ _id: -1 })
 }
 
 const getTotalMonths = async (query) => {
