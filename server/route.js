@@ -398,6 +398,112 @@ const updateAccounts = async (req, res, next, db) => {
   }
 }
 
+const getCategoryCatchwords = async (req, res, next, db) => {
+  try {
+    const result = await db.queryCategoryCatchwords(
+      req.query,
+      req.query.start,
+      req.query.limit
+    )
+    // const count = await db.getTotalMonths({})
+    res.send({
+      data: result,
+      // count,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const addCategoryCatchwords = async (req, res, next, db) => {
+  try {
+    const result = await db.addCategoryCatchwords(req.body)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const updateCategoryCatchwords = async (req, res, next, db) => {
+  try {
+    const list = req.body
+    const promises = []
+    list.forEach((l) => {
+      promises.push(db.updateCategoryCatchwords({ _id: l._id }, l))
+    })
+    const result = await Promise.all(promises)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const getMiscellaneousCatchwords = async (req, res, next, db) => {
+  try {
+    const result = await db.queryMiscellaneousCatchwords(
+      req.query,
+      req.query.start,
+      req.query.limit
+    )
+    // const count = await db.getTotalMonths({})
+    res.send({
+      data: result,
+      // count,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const addMiscellaneousCatchwords = async (req, res, next, db) => {
+  try {
+    const result = await db.addMiscellaneousCatchwords(req.body)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const updateMiscellaneousCatchwords = async (req, res, next, db) => {
+  try {
+    const list = req.body
+    const promises = []
+    list.forEach((l) => {
+      promises.push(db.updateMiscellaneousCatchwords({ _id: l._id }, l))
+    })
+    const result = await Promise.all(promises)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
 module.exports = {
   getExpenses,
   graphByMonths,
@@ -412,4 +518,10 @@ module.exports = {
   getAccounts,
   addAccount,
   updateAccounts,
+  getCategoryCatchwords,
+  addCategoryCatchwords,
+  updateCategoryCatchwords,
+  getMiscellaneousCatchwords,
+  updateMiscellaneousCatchwords,
+  addMiscellaneousCatchwords,
 }

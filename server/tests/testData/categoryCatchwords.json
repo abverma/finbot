@@ -1,0 +1,120 @@
+[
+  {
+    "_id": "65bd082e4ea4fbd359c9358b",
+    "category": "groceries",
+    "catchwords": [
+      "rolla",
+      "lulu",
+      "ruchika",
+      "vegandukan",
+      "big basket",
+      "innovative retail conc",
+      "the body shop",
+      "goel story"
+    ]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8af",
+    "category": "entertainment",
+    "catchwords": ["xbox", "netflix", "zee5", "hotstar", "bookmyshow"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b0",
+    "category": "medical",
+    "catchwords": [
+      "prima",
+      "medical",
+      "ellan",
+      "max life ins",
+      "clinic",
+      "motherhood",
+      "hospital",
+      "dental",
+      "columbia asia",
+      "upi-sheetal shrivastava",
+      "sheetal shrivastava",
+      "practo",
+      "diagnostic",
+      "shrivastava sheetal",
+      "maxlife"
+    ]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b1",
+    "category": "electricity",
+    "catchwords": ["bangalore electricit-bescl", "electricity", "bescom"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b2",
+    "category": "amazon",
+    "catchwords": ["amazon"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b3",
+    "category": "salary",
+    "catchwords": ["ora sal"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b4",
+    "category": "phone",
+    "catchwords": ["airtel"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b5",
+    "category": "travel",
+    "catchwords": [
+      "ola",
+      "uber",
+      "vistara",
+      "indigo",
+      "airlines",
+      "thimmarayaswamy",
+      "fuel point",
+      "makemytrip",
+      "smartbuy flight",
+      "parking",
+      "irctc"
+    ]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b6",
+    "category": "investment",
+    "catchwords": ["indian clearing corp", "indianclearing"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b7",
+    "category": "car-emi",
+    "catchwords": ["racpc koramangala", "sbi car loan"]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b8",
+    "category": "eating-out",
+    "catchwords": [
+      "swiggy",
+      "crave by leena",
+      "starbucks",
+      "carrots",
+      "spice klub",
+      "bundl technologies"
+    ]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8b9",
+    "category": "apparel",
+    "catchwords": [
+      "shoppers stop",
+      "shopperstop",
+      "pearl fancy store",
+      "mataji collection",
+      "life style",
+      "hennes n mauritz",
+      "metro brands",
+      "myntra"
+    ]
+  },
+  {
+    "_id": "65bd09a90afa146d9659f8ba",
+    "category": "baby",
+    "catchwords": ["firstcry", "mother care"]
+  }
+]

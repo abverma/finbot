@@ -1,0 +1,61 @@
+[
+  {
+    "_id": "65bd15cf0afa146d9659f8bb",
+    "expense_source": "maintenance",
+    "catchwords": ["MYGATE"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8bc",
+    "expense_source": "gail",
+    "catchwords": ["UPI-GAIL GAS LIMITED", "gail"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8bd",
+    "expense_source": "indmoney",
+    "catchwords": ["CTRAZORPAY-INDWEALTH"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8be",
+    "expense_source": "urban company",
+    "catchwords": ["URBANCOMPANY", "URBAN COMPANY", "URBANCLAP"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8bf",
+    "expense_source": "car service",
+    "catchwords": ["NEXASERVICE", "UPI-NEXA SERVICE"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8c0",
+    "expense_source": "atm withdrawal",
+    "catchwords": ["EAW-512967XXXXXX5130"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8c1",
+    "expense_source": "office meal",
+    "catchwords": [
+      "SODEXO ORACLE SITE",
+      "UPI-SODEXO ORACLE",
+      "NITHIN",
+      "DHEER",
+      "DATTA",
+      "PRANAVA",
+      "NAVEEN",
+      "ARCHIKA"
+    ]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8c2",
+    "expense_source": "ikea",
+    "catchwords": ["IKEA"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8c3",
+    "expense_source": "tailor",
+    "catchwords": ["ISHHQ"]
+  },
+  {
+    "_id": "65bd15cf0afa146d9659f8c4",
+    "expense_source": "donation",
+    "catchwords": ["DONATION"]
+  }
+]

@@ -29,6 +29,12 @@ const {
   getAccounts,
   addAccount,
   updateAccounts,
+  getCategoryCatchwords,
+  updateCategoryCatchwords,
+  addCategoryCatchwords,
+  getMiscellaneousCatchwords,
+  updateMiscellaneousCatchwords,
+  addMiscellaneousCatchwords,
 } = require('./route')
 const { convert } = require('./readFile')
 const app = express()
@@ -49,9 +55,10 @@ app.get('/fixedExpenses', (req, res, next) =>
   getFixedExpenses(req, res, next, db)
 )
 app.get('/graphByMonths', (req, res, next) => graphByMonths(req, res, next, db))
-app.post('/importFile', (req, res) => {
+app.post('/importFile', async (req, res) => {
   const { data, fileName, account } = req.body
-  db.bulkCreateExpense(importer.process(data, fileName, account))
+  const expenses = await importer.processFile(data, fileName, account, db)
+  db.bulkCreateExpense(expenses)
     .then(() => {
       console.log('expense added')
       res.json({
@@ -93,6 +100,24 @@ app.get('/expenseCategories', (req, res, next) =>
 app.get('/accounts', (req, res, next) => getAccounts(req, res, next, db))
 app.post('/accounts', (req, res, next) => addAccount(req, res, next, db))
 app.put('/accounts', (req, res, next) => updateAccounts(req, res, next, db))
+app.get('/categorycatchwords', (req, res, next) =>
+  getCategoryCatchwords(req, res, next, db)
+)
+app.post('/categorycatchwords', (req, res, next) =>
+  addCategoryCatchwords(req, res, next, db)
+)
+app.put('/categorycatchwords', (req, res, next) =>
+  updateCategoryCatchwords(req, res, next, db)
+)
+app.get('/miscellaneouscatchwords', (req, res, next) =>
+  getMiscellaneousCatchwords(req, res, next, db)
+)
+app.post('/miscellaneouscatchwords', (req, res, next) =>
+  addMiscellaneousCatchwords(req, res, next, db)
+)
+app.put('/miscellaneouscatchwords', (req, res, next) =>
+  updateMiscellaneousCatchwords(req, res, next, db)
+)
 app.put('/convertPdf', upload.any(), async (req, res) => {
   try {
     const file = req.files[0]

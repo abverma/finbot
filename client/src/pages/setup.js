@@ -28,19 +28,19 @@ export default function SetupPage() {
 
   return (
     <div className="container p-2">
-      <div class="toast-container fixed-bottom p-3">
+      <div className="toast-container fixed-bottom p-3">
         <div
           id="liveToast"
-          class="toast"
+          className="toast"
           role="alert"
           aria-live="assertive"
           aria-atomic="true"
         >
-          <div class="d-flex">
-            <div class="toast-body">{toastMessage}</div>
+          <div className="d-flex">
+            <div className="toast-body">{toastMessage}</div>
             <button
               type="button"
-              class="btn-close me-2 m-auto"
+              className="btn-close me-2 m-auto"
               data-bs-dismiss="toast"
               aria-label="Close"
             ></button>
@@ -51,12 +51,12 @@ export default function SetupPage() {
         <li className="nav-item" role="presentation">
           <button
             className="nav-link active"
-            id="home-tab"
+            id="import-tab"
             data-bs-toggle="tab"
-            data-bs-target="#home-tab-pane"
+            data-bs-target="#import-tab-pane"
             type="button"
             role="tab"
-            aria-controls="home-tab-pane"
+            aria-controls="import-tab-pane"
             aria-selected="true"
           >
             Import
@@ -65,25 +65,39 @@ export default function SetupPage() {
         <li className="nav-item" role="presentation">
           <button
             className="nav-link"
-            id="profile-tab"
+            id="metadata-tab"
             data-bs-toggle="tab"
-            data-bs-target="#profile-tab-pane"
+            data-bs-target="#metadata-tab-pane"
             type="button"
             role="tab"
-            aria-controls="profile-tab-pane"
+            aria-controls="metadata-tab-pane"
             aria-selected="false"
           >
             Metadata
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className="nav-link"
+            id="config-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#config-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="config-tab-pane"
+            aria-selected="false"
+          >
+            Configuration
           </button>
         </li>
       </ul>
       <div className="tab-content" id="myTabContent">
         <div
           className="tab-pane fade show active"
-          id="home-tab-pane"
+          id="import-tab-pane"
           role="tabpanel"
-          aria-labelledby="home-tab"
-          tabindex="0"
+          aria-labelledby="import-tab"
+          tabIndex="0"
         >
           <ImportComponent
             accountList={accountList}
@@ -92,10 +106,10 @@ export default function SetupPage() {
         </div>
         <div
           className="tab-pane fade"
-          id="profile-tab-pane"
+          id="metadata-tab-pane"
           role="tabpanel"
-          aria-labelledby="profile-tab"
-          tabindex="0"
+          aria-labelledby="metadata-tab"
+          tabIndex="0"
         >
           <div className="card border-0 shadow my-2 p-2">
             <div className="card-body">
@@ -104,6 +118,22 @@ export default function SetupPage() {
                 accountList={accountList}
                 dispatch={dispatch}
               ></AccountList>
+            </div>
+          </div>
+        </div>
+        <div
+          className="tab-pane fade"
+          id="config-tab-pane"
+          role="tabpanel"
+          aria-labelledby="config-tab"
+          tabIndex="0"
+        >
+          <div className="card border-0 shadow my-2 p-2">
+            <div className="card-body">
+              <ConfigList showToastMessage={showToastMessage}></ConfigList>
+              <MiscConfigList
+                showToastMessage={showToastMessage}
+              ></MiscConfigList>
             </div>
           </div>
         </div>
@@ -674,6 +704,326 @@ function AccountList({ accountList, dispatch }) {
   )
 }
 
+function ConfigList({ showToastMessage }) {
+  const [configList, dispatch] = useReducer(configListReducer, [])
+  const changedIdList = useRef([])
+
+  useEffect(() => {
+    fetchConfigList()
+  }, [])
+
+  function fetchConfigList() {
+    fetch(`/categorycatchwords?start=0&limit=10`)
+      .then((data) => data.json())
+      .then((data) => {
+        // setTotal(data.count)
+        dispatch({
+          type: 'set',
+          data: data.data,
+        })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
+  function addRow() {
+    dispatch({
+      type: 'add',
+      category: '',
+      catchwords: [],
+    })
+  }
+
+  function save() {
+    const changedRows = changedIdList.current.map((x) => {
+      return configList.find((y) => y._id === x)
+    })
+    const newRows = configList.filter((x) => {
+      return !x._id
+    })
+    saveChangedRows(changedRows)
+    saveNewRows(newRows)
+  }
+
+  function saveNewRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/categorycatchwords', {
+      method: 'POST',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function saveChangedRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/categorycatchwords', {
+      method: 'PUT',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function handleChange(value, idx, field) {
+    if (
+      configList[idx]['_id'] &&
+      !changedIdList.current.find((x) => x === configList[idx]['_id'])
+    ) {
+      changedIdList.current.push(configList[idx]['_id'])
+    }
+    dispatch({
+      type: 'change',
+      idx,
+      field,
+      value,
+    })
+  }
+
+  return (
+    <div className="card-body">
+      <div className="card-header border-0 row justify-content-between white">
+        <h5 className="col-auto card-title">Expense Category Catchwords</h5>
+        <div className="col-2 d-flex flex-row-reverse justify-content-start">
+          <button className="btn btn-primary mx-1" onClick={save}>
+            Save
+          </button>
+          <button className="btn btn-primary mx-1" onClick={addRow}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="table table-hover card-body align-middle mb-0">
+        <thead className="table-light">
+          <tr>
+            <th scope="col" className="text-muted">
+              #
+            </th>
+            <th scope="col" className="text-muted">
+              Category
+            </th>
+            <th scope="col" className="text-muted">
+              Catch Words
+            </th>
+          </tr>
+        </thead>
+        <tbody className="list">
+          {configList.map((item, idx) => (
+            <tr key={idx}>
+              <th scope="row" className="text-muted">
+                {idx + 1}
+              </th>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.category}
+                  onChange={(e) =>
+                    handleChange(e.target.value, idx, 'category')
+                  }
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.catchwords?.join(',') || ''}
+                  onChange={(e) =>
+                    handleChange(e.target.value.split(','), idx, 'catchwords')
+                  }
+                ></input>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function MiscConfigList({ showToastMessage }) {
+  const [configList, dispatch] = useReducer(miscListReducer, [])
+  const changedIdList = useRef([])
+
+  useEffect(() => {
+    fetchConfigList()
+  }, [])
+
+  function fetchConfigList() {
+    fetch(`/miscellaneouscatchwords?start=0&limit=10`)
+      .then((data) => data.json())
+      .then((data) => {
+        // setTotal(data.count)
+        dispatch({
+          type: 'set',
+          data: data.data,
+        })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
+  function addRow() {
+    dispatch({
+      type: 'add',
+      expense_source: '',
+      catchwords: [],
+    })
+  }
+
+  function save() {
+    const changedRows = changedIdList.current.map((x) => {
+      return configList.find((y) => y._id === x)
+    })
+    const newRows = configList.filter((x) => {
+      return !x._id
+    })
+    saveChangedRows(changedRows)
+    saveNewRows(newRows)
+  }
+
+  function saveNewRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/miscellaneouscatchwords', {
+      method: 'POST',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function saveChangedRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/miscellaneouscatchwords', {
+      method: 'PUT',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function handleChange(value, idx, field) {
+    if (
+      configList[idx]['_id'] &&
+      !changedIdList.current.find((x) => x === configList[idx]['_id'])
+    ) {
+      changedIdList.current.push(configList[idx]['_id'])
+    }
+    dispatch({
+      type: 'change',
+      idx,
+      field,
+      value,
+    })
+  }
+
+  return (
+    <div className="card-body">
+      <div className="card-header border-0 row justify-content-between white">
+        <h5 className="col-auto card-title">
+          Miscellaneous Expenses Catchwords
+        </h5>
+        <div className="col-2 d-flex flex-row-reverse justify-content-start">
+          <button className="btn btn-primary mx-1" onClick={save}>
+            Save
+          </button>
+          <button className="btn btn-primary mx-1" onClick={addRow}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="table table-hover card-body align-middle mb-0">
+        <thead className="table-light">
+          <tr>
+            <th scope="col" className="text-muted">
+              #
+            </th>
+            <th scope="col" className="text-muted">
+              Expense Source
+            </th>
+            <th scope="col" className="text-muted">
+              Catch Words
+            </th>
+          </tr>
+        </thead>
+        <tbody className="list">
+          {configList.map((item, idx) => (
+            <tr key={idx}>
+              <th scope="row" className="text-muted">
+                {idx + 1}
+              </th>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.expense_source}
+                  onChange={(e) =>
+                    handleChange(e.target.value, idx, 'expense_source')
+                  }
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.catchwords?.join(',') || ''}
+                  onChange={(e) =>
+                    handleChange(e.target.value.split(','), idx, 'catchwords')
+                  }
+                ></input>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function accountListReducer(accountList, action) {
   switch (action.type) {
     case 'set':
@@ -713,5 +1063,50 @@ function monthListReducer(monthList, action) {
       })
     default:
       console.log('monthListReducer: Invalid reducer action.')
+  }
+}
+
+function configListReducer(configList, action) {
+  switch (action.type) {
+    case 'set':
+      return action.data
+    case 'add':
+      return [
+        { category: action.category, catchwords: action.catchwords },
+        ...configList,
+      ]
+    case 'change':
+      return configList.map((item, idx) => {
+        if (idx === action.idx) {
+          item[action.field] = action.value
+        }
+        return item
+      })
+    default:
+      console.log('configListReducer: Invalid reducer action.')
+  }
+}
+
+function miscListReducer(configList, action) {
+  switch (action.type) {
+    case 'set':
+      return action.data
+    case 'add':
+      return [
+        {
+          expense_source: action.expense_source,
+          catchwords: action.catchwords,
+        },
+        ...configList,
+      ]
+    case 'change':
+      return configList.map((item, idx) => {
+        if (idx === action.idx) {
+          item[action.field] = action.value
+        }
+        return item
+      })
+    default:
+      console.log('miscListReducer: Invalid reducer action.')
   }
 }

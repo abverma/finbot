@@ -1,118 +1,29 @@
-const expenseDictionary = {
-  groceries: [
-    'rolla',
-    'lulu',
-    'ruchika',
-    'vegandukan',
-    'big basket',
-    'innovative retail conc',
-    'the body shop',
-    'goel story',
-  ],
-  entertainment: ['xbox', 'netflix', 'zee5', 'hotstar', 'bookmyshow'],
-  medical: [
-    'prima',
-    'medical',
-    'ellan',
-    'max life ins',
-    'clinic',
-    'motherhood',
-    'hospital',
-    'dental',
-    'columbia asia',
-    'upi-sheetal shrivastava',
-    'sheetal shrivastava',
-    'practo',
-    'diagnostic',
-    'shrivastava sheetal',
-    'maxlife',
-  ],
-  electricity: ['bangalore electricit-bescl', 'electricity', 'bescom'],
-  amazon: ['amazon'],
-  salary: ['ora sal'],
-  phone: ['airtel'],
-  travel: [
-    'ola',
-    'uber',
-    'vistara',
-    'indigo',
-    'airlines',
-    'thimmarayaswamy',
-    'fuel point',
-    'makemytrip',
-    'smartbuy flight',
-    'parking',
-    'irctc',
-  ],
-  investment: ['indian clearing corp', 'indianclearing'],
-  'car-emi': ['racpc koramangala', 'sbi car loan'],
-  'eating-out': [
-    'swiggy',
-    'crave by leena',
-    'starbucks',
-    'carrots',
-    'spice klub',
-    'bundl technologies',
-  ],
-  apparel: [
-    'shoppers stop',
-    'shopperstop',
-    'pearl fancy store',
-    'mataji collection',
-    'life style',
-    'hennes n mauritz',
-    'metro brands',
-    'myntra',
-  ],
-  baby: ['firstcry', 'mother care'],
-}
-
-const miscSourceDictionary = {
-  maintenance: ['MYGATE'],
-  gail: ['UPI-GAIL GAS LIMITED', 'gail'],
-  indmoney: ['CTRAZORPAY-INDWEALTH'],
-  'urban company': ['URBANCOMPANY', 'URBAN COMPANY', 'URBANCLAP'],
-  'car service': ['NEXASERVICE', 'UPI-NEXA SERVICE'],
-  'atm withdrawal': ['EAW-512967XXXXXX5130'],
-  'office meal': [
-    'SODEXO ORACLE SITE',
-    'UPI-SODEXO ORACLE',
-    'NITHIN',
-    'DHEER',
-    'DATTA',
-    'PRANAVA',
-    'NAVEEN',
-    'ARCHIKA',
-  ],
-  ikea: ['IKEA'],
-  tailor: ['ISHHQ'],
-  donation: ['DONATION'],
-}
-
-const tagCategory = (obj) => {
+const tagCategory = async (obj, db) => {
   const desc = obj['details'].toLowerCase()
+  const expenseDictionary = await db.queryCategoryCatchwords({})
+  const miscSourceDictionary = await db.queryMiscellaneousCatchwords({})
 
-  Object.keys(expenseDictionary).forEach((idx) => {
-    for (let j = 0; j < expenseDictionary[idx].length; j++) {
+  expenseDictionary.forEach((item) => {
+    for (let j = 0; j < item.catchwords.length; j++) {
       if (
         !obj['category'] &&
-        desc.toLowerCase().includes(expenseDictionary[idx][j].toLowerCase())
+        desc.toLowerCase().includes(item.catchwords[j].toLowerCase())
       ) {
-        obj['category'] = idx
-        obj['expense_source'] = expenseDictionary[idx][j]
+        obj['category'] = item.category
+        obj['expense_source'] = item.catchwords[j]
       }
     }
   })
   if (!obj['category']) {
     obj['expense_source'] = ''
 
-    Object.keys(miscSourceDictionary).forEach((idx) => {
-      for (let j = 0; j < miscSourceDictionary[idx].length; j++) {
+    miscSourceDictionary.forEach((item) => {
+      for (let j = 0; j < item.catchwords.length; j++) {
         if (
           !obj['expense_source'] &&
-          desc.includes(miscSourceDictionary[idx][j].toLowerCase())
+          desc.includes(item.catchwords[j].toLowerCase())
         ) {
-          obj['expense_source'] = idx
+          obj['expense_source'] = item.expense_source
         }
       }
     })
@@ -137,7 +48,7 @@ const formatDates = (data) => {
   }
 }
 
-const process = (data, fileName, account) => {
+const process = async (data, account, db) => {
   for (let i = 0; i < data.length; i++) {
     let trx_type = 'debit'
     const row = data[i]
@@ -173,11 +84,11 @@ const process = (data, fileName, account) => {
       }
       delete row['amount']
     }
-    tagCategory(row)
+    await tagCategory(row, db)
     row['trx_type'] = trx_type
     formatDates(row)
   }
   return data
 }
 
-exports.process = process
+exports.processFile = process

@@ -42,6 +42,16 @@ const Accounts = mongoose.model('accounts', {
   enabled: Boolean,
 })
 
+const CategoryCatchwords = mongoose.model('category_catchwords', {
+  category: String,
+  catchwords: Array,
+})
+
+const MiscellaneousCatchwords = mongoose.model('miscellaneous_catchwords', {
+  expense_source: String,
+  catchwords: Array,
+})
+
 const connect = async function () {
   // await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
   await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
@@ -110,6 +120,30 @@ const updateAccounts = async (query, item) => {
   return Accounts.updateOne(query, item)
 }
 
+const queryCategoryCatchwords = async (query) => {
+  return CategoryCatchwords.find(query)
+}
+
+const addCategoryCatchwords = async (list) => {
+  return CategoryCatchwords.insertMany(list)
+}
+
+const updateCategoryCatchwords = async (query, item) => {
+  return CategoryCatchwords.updateOne(query, item)
+}
+
+const queryMiscellaneousCatchwords = async (query) => {
+  return MiscellaneousCatchwords.find(query)
+}
+
+const addMiscellaneousCatchwords = async (list) => {
+  return MiscellaneousCatchwords.insertMany(list)
+}
+
+const updateMiscellaneousCatchwords = async (query, item) => {
+  return MiscellaneousCatchwords.updateOne(query, item)
+}
+
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -144,4 +178,10 @@ module.exports = {
   addAccount,
   updateAccounts,
   getTotalMonths,
+  queryCategoryCatchwords,
+  addCategoryCatchwords,
+  updateCategoryCatchwords,
+  queryMiscellaneousCatchwords,
+  addMiscellaneousCatchwords,
+  updateMiscellaneousCatchwords,
 }

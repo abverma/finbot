@@ -1,0 +1,20 @@
+{
+  "fileName": "CCStatement01-02-2024.csv",
+  "account": "icici credit card",
+  "data": [
+    {
+      "": "",
+      "date": "30/01/2024",
+      "details": "INFINITY PAYMENT RECEIVED, THANK YOU",
+      "amount": "1,951.20 Cr.",
+      "reference_number": "8680502253"
+    },
+    {
+      "": "",
+      "date": "15/01/2024",
+      "details": "IND*AMAZON, HTTP://WWW.AM, IN",
+      "amount": "1,618.20 Dr.",
+      "reference_number": "8617822084"
+    }
+  ]
+}
