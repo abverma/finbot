@@ -52,6 +52,10 @@ const MiscellaneousCatchwords = mongoose.model('miscellaneous_catchwords', {
   catchwords: Array,
 })
 
+const IgnoredExpenses = mongoose.model('ignored_expenses', {
+  desc: String,
+})
+
 const connect = async function () {
   // await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
   await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
@@ -144,6 +148,10 @@ const updateMiscellaneousCatchwords = async (query, item) => {
   return MiscellaneousCatchwords.updateOne(query, item)
 }
 
+const queryIgnoredExpenses = async (query) => {
+  return IgnoredExpenses.find(query)
+}
+
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -184,4 +192,5 @@ module.exports = {
   queryMiscellaneousCatchwords,
   addMiscellaneousCatchwords,
   updateMiscellaneousCatchwords,
+  queryIgnoredExpenses,
 }

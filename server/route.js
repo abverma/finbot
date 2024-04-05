@@ -1,13 +1,4 @@
-const ignoredExpenses = [
-  /ABHISHEK VERMA-ICIC-XXXXXXXX4593-SELF/,
-  /INFINITY PAYMENT RECEIVED, THANK YOU/,
-  /UPI-ABHISHEK VERMA-ABHINOW.ABHISHEK@ICICI/,
-  /ABHISHEK VERMA-ICIC-XXXXXXXX4593/,
-  /UPI-RUCHIKA {2}SAINI-9410371779/,
-  /ABHISHEK VERMA-NETBANK/,
-  /AUTOPAY THANK YOU/,
-  /AUTOPAY/,
-]
+const appMetadata = require('./appMetadata').instance
 const totalClause = {
   $sum: {
     $cond: [
@@ -33,7 +24,7 @@ const getExpenses = async (req, res, next, db) => {
     const expenses = await db.queryExpense({
       date: dateClause,
       details: {
-        $nin: ignoredExpenses,
+        $nin: appMetadata.ignoredExpenses,
       },
     })
     const pipelines = [
@@ -44,7 +35,7 @@ const getExpenses = async (req, res, next, db) => {
           },
           date: dateClause,
           details: {
-            $nin: ignoredExpenses,
+            $nin: appMetadata.ignoredExpenses,
           },
         },
       },
@@ -119,7 +110,7 @@ const graphByMonths = async (req, res, next, db) => {
           $ne: 'investment',
         },
         details: {
-          $nin: ignoredExpenses,
+          $nin: appMetadata.ignoredExpenses,
         },
         date: {
           $gt: new Date('2022-09-01'),
@@ -205,7 +196,7 @@ const getFixedExpenses = async (req, res, next, db) => {
             $lt: endDate,
           },
           details: {
-            $nin: ignoredExpenses,
+            $nin: appMetadata.ignoredExpenses,
           },
           $or: [
             {

@@ -138,6 +138,7 @@ export default function HomePage() {
           'maxlife',
           'maid',
           'gail',
+          'cook',
         ]
         for (let i = 0; i < fixeds.length; i++) {
           if (expense.expense_source.toLowerCase().includes(fixeds[i])) {

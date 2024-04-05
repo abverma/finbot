@@ -48,7 +48,7 @@ const formatDates = (data) => {
   }
 }
 
-const process = async (data, account, db) => {
+const process = async (data, filename, account, db) => {
   for (let i = 0; i < data.length; i++) {
     let trx_type = 'debit'
     const row = data[i]

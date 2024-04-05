@@ -14,6 +14,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname)
   },
 })
+const AppMetadata = require('./appMetadata')
 const upload = multer({ storage })
 const {
   getExpenses,
@@ -134,6 +135,11 @@ app.listen(3001, async () => {
   try {
     await db.connect()
     console.log('connected to database ...')
+    const ignoredExpenses = await db.queryIgnoredExpenses()
+    if (ignoredExpenses) {
+      const appMetadata = AppMetadata.instance
+      appMetadata.ignoredExpenses = ignoredExpenses
+    }
   } catch (e) {
     console.log(e)
   }

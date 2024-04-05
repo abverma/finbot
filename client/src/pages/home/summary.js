@@ -14,6 +14,7 @@ export default function Summary(props) {
     'eating-out': 'bi-cup-hot',
     misc: 'bi-question-lg',
     amazon: 'bi-cart',
+    baby: 'bi-heart-fill',
   }
 
   if (props.dateString) {
