@@ -43,13 +43,16 @@ export default function ExpenseList(props) {
       })
   }, [props.dateString])
 
+  function handleKeywordSearch(value) {
+    props.handleLocalSearch(value ?? value.toLowerCase(), 'keyword')
+  }
   return (
     <div>
       <Provider store={store}>
         <SplitModal expenseCategories={expenseCategories}></SplitModal>
         <div className="row card border-0 shadow">
           <div className="card-header border-0 white text-center">
-            <div className="row col-12">
+            <div className="row col-12 align-items-center ">
               <span className="col-3 card-header-title py-2 text-muted mb-0">
                 Total: &nbsp;
                 {props.expenses
@@ -68,6 +71,19 @@ export default function ExpenseList(props) {
               <h6 className="col-6 card-header-title h6 p-2 text-muted mb-0">
                 EXPENSES {titleDateString}
               </h6>
+              <div className="col-3">
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  placeholder="Search"
+                  onChange={(e) =>
+                    props.handleLocalSearch(
+                      e.target.value ?? e.target.value.toLowerCase(),
+                      'keyword'
+                    )(e.target.value)
+                  }
+                ></input>
+              </div>
             </div>
             <div className="card-header row white border-0 justify-content-center">
               <div className="col-md-4 col-12 row align-items-center justify-content-start gx-1">
@@ -80,7 +96,7 @@ export default function ExpenseList(props) {
                     onChange={(e) => {
                       props.setResetFilter(false)
                       setFilterCategory(e.target.value)
-                      props.handleSelectCategory(e.target.value, 'category')
+                      props.handleLocalSearch(e.target.value, 'category')
                     }}
                   >
                     <option value="" defaultValue>
@@ -111,7 +127,7 @@ export default function ExpenseList(props) {
                     onChange={(e) => {
                       props.setResetFilter(false)
                       setFilterAccount(e.target.value)
-                      props.handleSelectCategory(e.target.value, 'source')
+                      props.handleLocalSearch(e.target.value, 'source')
                     }}
                   >
                     <option value="" defaultValue>
@@ -135,7 +151,7 @@ export default function ExpenseList(props) {
                     onChange={(e) => {
                       props.setResetFilter(false)
                       setFilterPriority(e.target.value)
-                      props.handleSelectCategory(e.target.value, 'priority')
+                      props.handleLocalSearch(e.target.value, 'priority')
                     }}
                   >
                     <option value="" defaultValue>

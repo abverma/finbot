@@ -233,7 +233,7 @@ export default function HomePage() {
     tagExpenses(filteredExpenses)
   }
 
-  function handleSelectCategory(value, filterLabel) {
+  function handleLocalSearch(value, filterLabel) {
     if (filterLabel) {
       let filteredExpenses = expenses
       let filterState = filter
@@ -247,8 +247,10 @@ export default function HomePage() {
 
       if (Object.keys(filterState).length) {
         Object.keys(filterState).forEach((key) => {
-          filteredExpenses = Object.assign([], filteredExpenses).filter(
-            (x) => x[key] == filterState[key]
+          filteredExpenses = Object.assign([], filteredExpenses).filter((x) =>
+            key === 'keyword'
+              ? keywordSearch(filterState[key], x)
+              : x[key] == filterState[key]
           )
         })
         setFilteredExpenses(filteredExpenses)
@@ -258,6 +260,14 @@ export default function HomePage() {
         setFilter(filterState)
       }
     }
+  }
+
+  function keywordSearch(keyword, expense) {
+    return (
+      expense.details.toLowerCase().includes(keyword) ||
+      expense.source.toLowerCase().includes(keyword) ||
+      expense.expense_source.toLowerCase().includes(keyword)
+    )
   }
 
   async function handleSelectMonth(e) {
@@ -341,13 +351,14 @@ export default function HomePage() {
             <ExpenseList
               expenses={filteredExpenses}
               dateString={date}
-              handleSelectCategory={(value, filter) =>
-                handleSelectCategory(value, filter)
+              handleLocalSearch={(value, filter) =>
+                handleLocalSearch(value, filter)
               }
               updateRow={(row) => updateRow(row)}
               saveRow={(row) => saveRow(row)}
               resetFilter={resetFilter}
               setResetFilter={setResetFilter}
+              keywordSearch={(keyword) => keywordSearch(keyword)}
             ></ExpenseList>
           </div>
         </div>
