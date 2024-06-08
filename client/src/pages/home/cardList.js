@@ -1,7 +1,14 @@
 import React from 'react'
 import { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
+import { setCurrentExpense } from '../../../lib/slice'
 
 export default function CardList(props) {
+  const count = useSelector((state) => state.counter.value)
+  const dispatch = useDispatch()
+  function checkRow(index) {}
+
   return (
     <div className="p-0">
       {props.expenses.map((row, idx) => {
@@ -13,6 +20,8 @@ export default function CardList(props) {
             expenseCategories={props.expenseCategories}
             updateRow={props.updateRow}
             saveRow={props.saveRow}
+            checkRow={checkRow}
+            dispatch={dispatch}
           ></Card>
         )
       })}
@@ -20,11 +29,21 @@ export default function CardList(props) {
   )
 }
 
-function Card({ row, expenseCategories, updateRow, saveRow, index }) {
+function Card({
+  row,
+  expenseCategories,
+  updateRow,
+  saveRow,
+  checkRow,
+  index,
+  dispatch,
+}) {
   const [isEdit, setIsEdit] = useState(false)
 
-  function onChange(e, row, rowKey) {
-    if (e.target) {
+  function onChange(e, rowKey) {
+    if (rowKey === 'checked') {
+      checkRow(index)
+    } else if (e.target) {
       row[rowKey] = e.target.value
     }
     updateRow(row)
@@ -36,7 +55,7 @@ function Card({ row, expenseCategories, updateRow, saveRow, index }) {
     }
   }
 
-  function onKeyUp(e, row, rowKey) {
+  function onKeyUp(e, rowKey) {
     if (e.code == 'Enter' && e.key == 'Enter') {
       const updateObj = {}
       updateObj[rowKey] = e.target.value
@@ -46,14 +65,35 @@ function Card({ row, expenseCategories, updateRow, saveRow, index }) {
     }
   }
 
+  async function toggleModal(row) {
+    const splitModal = new bootstrap.Modal('#splitModal')
+    dispatch(setCurrentExpense(row))
+    splitModal.show()
+    document
+      .getElementById('splitModal')
+      .addEventListener('hide.bs.modal', (event) => {
+        debugger
+        dispatch(setCurrentExpense({}))
+      })
+  }
+
   return (
     <div className="card m-1">
       <div className="card-header">
         <div className="row align-items-start">
-          <div className="col">{`#${index + 1}   ${new Date(
-            row.date
-          ).toDateString()}`}</div>
-          <div className="col text-end">
+          <div className="col-1">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              defaultChecked
+              onChange={(e) => onChange(e, 'checked')}
+            ></input>
+            <span>&nbsp;#{index + 1}</span>
+          </div>
+          <div className="col text-center">
+            {new Date(row.date).toDateString()}
+          </div>
+          <div className="col-1 text-end">
             {isEdit ? (
               <i
                 className="bi bi-check2"
@@ -71,6 +111,14 @@ function Card({ row, expenseCategories, updateRow, saveRow, index }) {
                 ></i>
               </small>
             )}
+            <small>
+              <i
+                className="bi bi-vr ms-2"
+                type="button"
+                data-bs-title="Split"
+                onClick={() => toggleModal(row)}
+              ></i>
+            </small>
           </div>
         </div>
       </div>
@@ -81,7 +129,7 @@ function Card({ row, expenseCategories, updateRow, saveRow, index }) {
               <select
                 className="form-select form-select-sm mb-1"
                 value={row.category}
-                onChange={(e) => onChange(e, row, 'category')}
+                onChange={(e) => onChange(e, 'category')}
               >
                 {expenseCategories.map((x) => (
                   <option value={x.category} key={x._id}>
@@ -105,8 +153,8 @@ function Card({ row, expenseCategories, updateRow, saveRow, index }) {
                 type="text"
                 value={row.expense_source}
                 className="form-control form-control-sm mb-1"
-                onChange={(e) => onChange(e, row, 'expense_source')}
-                onKeyUp={(e) => onKeyUp(e, row, 'expense_source')}
+                onChange={(e) => onChange(e, 'expense_source')}
+                onKeyUp={(e) => onKeyUp(e, 'expense_source')}
               ></input>
             ) : (
               <div className="form-control-plaintext form-control-sm mb-1">

@@ -172,7 +172,7 @@ const updateExpense = async (req, res, next, db) => {
     )
 
     res.send({
-      expenses: data,
+      expenses: undefined,
     })
   } catch (e) {
     res.status(500).send({

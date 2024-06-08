@@ -19,6 +19,7 @@ const expenseSchema = new mongoose.Schema({
     default: Date.now,
   },
   update_date: Date,
+  parent_id: mongoose.ObjectId,
 })
 const DB_HOST = process.env.DB_HOST
 const DB_NAME = process.env.DB_NAME

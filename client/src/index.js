@@ -1,9 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
 
 import HomePage from './pages/home/home'
 import SetupPage from './pages/setup'
 import AnalyticsPage from './pages/analytics'
+import store from '../lib/store'
 
 class App extends React.Component {
   constructor(props) {
@@ -105,4 +107,8 @@ class App extends React.Component {
 }
 
 const app = ReactDOM.createRoot(document.getElementById('app'))
-app.render(<App />)
+app.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+)

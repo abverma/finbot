@@ -26,6 +26,12 @@ export default function HomePage() {
     fetchExpenses()
     fetchMonthBalances()
     fetchMonthList()
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    )
+    const tooltipList = [...tooltipTriggerList].map(
+      (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+    )
   }, [date])
 
   function fetchMonthList() {
@@ -280,68 +286,70 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container p-3 m-auto">
-      <div className="row justify-content-start align-items-center">
-        <div className="ps-0 col-10 col-md-4">
-          <select
-            id="selectMonth"
-            className="form-select form-select-md m-2"
-            aria-label="Default select example"
-            onChange={(e) => handleSelectMonth(e)}
-          >
-            <option defaultValue value="">
-              Select month
-            </option>
-            {monthList.map((x) => (
-              <option key={x._id} value={x.value}>
-                {x.label}
+    <div>
+      <div className="container p-3 m-auto">
+        <div className="row justify-content-start align-items-center">
+          <div className="ps-0 col-10 col-md-4">
+            <select
+              id="selectMonth"
+              className="form-select form-select-md m-2"
+              aria-label="Default select example"
+              onChange={(e) => handleSelectMonth(e)}
+            >
+              <option defaultValue value="">
+                Select month
               </option>
-            ))}
-          </select>
+              {monthList.map((x) => (
+                <option key={x._id} value={x.value}>
+                  {x.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="col-auto">
+            <i
+              className="bi bi-arrow-clockwise"
+              type="button"
+              data-bs-title="Refresh"
+              onClick={() => refreshPage()}
+            ></i>
+          </div>
         </div>
-        <div className="col-auto">
-          <i
-            className="bi bi-arrow-clockwise"
-            type="button"
-            data-bs-title="Refresh"
-            onClick={() => refreshPage()}
-          ></i>
+        <div className="row pb-2">
+          <SearchBar
+            handleSearch={(c) => handleSearch(c)}
+            handleClearSearch={() => handleClearSearch()}
+          ></SearchBar>
         </div>
-      </div>
-      <div className="row pb-2">
-        <SearchBar
-          handleSearch={(c) => handleSearch(c)}
-          handleClearSearch={() => handleClearSearch()}
-        ></SearchBar>
-      </div>
-      <div className="row gx-5 gy-2">
-        <div className="col-12 col-md-4">
-          <Summary
-            aggregate={aggregates}
-            dateString={date}
-            total={total}
-            totalFixed={totalFixed}
-            totalNecessary={totalNecessary}
-            totalAvoidable={totalAvoidable}
-            totalDoesntHurt={totalDoesntHurt}
-            credit={credit}
-            salary={salary}
-            openingBalance={openingBalance}
-            closingBalance={closingBalance}
-          ></Summary>
-        </div>
-        <div className="col-12 col-md-8">
-          <ExpenseList
-            expenses={filteredExpenses}
-            dateString={date}
-            handleSelectCategory={(value, filter) =>
-              handleSelectCategory(value, filter)
-            }
-            updateRow={(row) => updateRow(row)}
-            saveRow={(row) => saveRow(row)}
-            resetFilter={resetFilter}
-            setResetFilter={setResetFilter}
-          ></ExpenseList>
+        <div className="row gx-5 gy-2">
+          <div className="col-12 col-md-4">
+            <Summary
+              aggregate={aggregates}
+              dateString={date}
+              total={total}
+              totalFixed={totalFixed}
+              totalNecessary={totalNecessary}
+              totalAvoidable={totalAvoidable}
+              totalDoesntHurt={totalDoesntHurt}
+              credit={credit}
+              salary={salary}
+              openingBalance={openingBalance}
+              closingBalance={closingBalance}
+            ></Summary>
+          </div>
+          <div className="col-12 col-md-8">
+            <ExpenseList
+              expenses={filteredExpenses}
+              dateString={date}
+              handleSelectCategory={(value, filter) =>
+                handleSelectCategory(value, filter)
+              }
+              updateRow={(row) => updateRow(row)}
+              saveRow={(row) => saveRow(row)}
+              resetFilter={resetFilter}
+              setResetFilter={setResetFilter}
+            ></ExpenseList>
+          </div>
         </div>
       </div>
     </div>

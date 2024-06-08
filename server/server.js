@@ -38,6 +38,7 @@ const {
   addMiscellaneousCatchwords,
 } = require('./route')
 const { convert } = require('./readFile')
+const exp = require('constants')
 const app = express()
 
 app.use(express.static(path.join(__dirname, '../client/dist')))
@@ -52,6 +53,22 @@ app.get('/', (req, res) => {
 })
 app.get('/expenses', (req, res, next) => getExpenses(req, res, next, db))
 app.put('/expenses', (req, res, next) => updateExpense(req, res, next, db))
+app.post('/expenses', async (req, res, next) => {
+  const expenses = req.body
+  try {
+    console.log(JSON.stringify(expenses))
+    await db.bulkCreateExpense(expenses)
+    res.json({
+      success: true,
+    })
+  } catch (e) {
+    console.log(e)
+    res.json({
+      success: false,
+      details: e,
+    })
+  }
+})
 app.get('/fixedExpenses', (req, res, next) =>
   getFixedExpenses(req, res, next, db)
 )

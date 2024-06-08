@@ -14,7 +14,8 @@ export default function Summary(props) {
     'eating-out': 'bi-cup-hot',
     misc: 'bi-question-lg',
     amazon: 'bi-cart',
-    baby: 'bi-heart-fill',
+    baby: 'bi-balloon',
+    cat: 'bi-c-circle',
   }
 
   if (props.dateString) {
@@ -59,8 +60,9 @@ export default function Summary(props) {
               )
             })
           : ''}
+
         {props.total ? (
-          <dl className="row mt-4 mb-0">
+          <dl className="row mb-0">
             <dt className="col-7">
               <i className="bi bi-receipt px-2"></i>Total Expense
             </dt>
@@ -74,7 +76,7 @@ export default function Summary(props) {
         ) : null}
 
         {props.totalFixed ? (
-          <dl className="row mb-0">
+          <dl className="row mt-4 mb-0">
             <dt className="col-7">
               <i className="bi bi-flag-fill px-2 text-primary"></i>Fixed Expense
             </dt>
@@ -147,7 +149,7 @@ export default function Summary(props) {
         ) : null}
 
         {props.salary ? (
-          <dl className="row mb-0">
+          <dl className="row mt-4 mb-0">
             <dt className="col-7">
               <i className="bi bi-cash-stack px-2"></i>Salary
             </dt>
