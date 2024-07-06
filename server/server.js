@@ -36,6 +36,8 @@ const {
   getMiscellaneousCatchwords,
   updateMiscellaneousCatchwords,
   addMiscellaneousCatchwords,
+  addExpenseCategory,
+  updateExpenseCategory,
 } = require('./route')
 const { convert } = require('./readFile')
 const exp = require('constants')
@@ -114,6 +116,12 @@ app.post('/monthList', (req, res, next) => addToMonthList(req, res, next, db))
 app.put('/monthList', (req, res, next) => updateMonthList(req, res, next, db))
 app.get('/expenseCategories', (req, res, next) =>
   getExpenseCategories(req, res, next, db)
+)
+app.post('/expenseCategories', (req, res, next) =>
+  addExpenseCategory(req, res, next, db)
+)
+app.put('/expenseCategories', (req, res, next) =>
+  updateExpenseCategory(req, res, next, db)
 )
 app.get('/accounts', (req, res, next) => getAccounts(req, res, next, db))
 app.post('/accounts', (req, res, next) => addAccount(req, res, next, db))

@@ -153,6 +153,13 @@ const queryIgnoredExpenses = async (query) => {
   return IgnoredExpenses.find(query)
 }
 
+const addExpenseCategory = async (list) => {
+  return ExpenseCategories.insertMany(list)
+}
+
+const updateExpenseCategory = async (query, item) => {
+  return ExpenseCategories.updateOne(query, item)
+}
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -194,4 +201,6 @@ module.exports = {
   addMiscellaneousCatchwords,
   updateMiscellaneousCatchwords,
   queryIgnoredExpenses,
+  addExpenseCategory,
+  updateExpenseCategory,
 }

@@ -13,13 +13,19 @@ const totalClause = {
 
 const getExpenses = async (req, res, next, db) => {
   const startDate = new Date(req.query.startDate)
+  startDate.setHours(0)
+  // startDate.setDate(new Date(startDate).getDate() - 1)
+
   const endDate = new Date(
     new Date(startDate).setMonth(startDate.getMonth() + 1)
   )
+  console.log(startDate)
+  console.log(endDate)
   const dateClause = {
     $gte: startDate,
     $lt: endDate,
   }
+  console.log(dateClause)
   try {
     const expenses = await db.queryExpense({
       date: dateClause,
@@ -370,12 +376,45 @@ const addAccount = async (req, res, next, db) => {
   }
 }
 
+const addExpenseCategory = async (req, res, next, db) => {
+  try {
+    const result = await db.addExpenseCategory(req.body)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
 const updateAccounts = async (req, res, next, db) => {
   try {
     const list = req.body
     const promises = []
     list.forEach((l) => {
       promises.push(db.updateAccounts({ _id: l._id }, l))
+    })
+    const result = await Promise.all(promises)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const updateExpenseCategory = async (req, res, next, db) => {
+  try {
+    const list = req.body
+    const promises = []
+    list.forEach((l) => {
+      promises.push(db.updateExpenseCategory({ _id: l._id }, l))
     })
     const result = await Promise.all(promises)
     res.send({
@@ -515,4 +554,6 @@ module.exports = {
   getMiscellaneousCatchwords,
   updateMiscellaneousCatchwords,
   addMiscellaneousCatchwords,
+  addExpenseCategory,
+  updateExpenseCategory,
 }

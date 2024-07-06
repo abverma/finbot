@@ -130,6 +130,9 @@ export default function SetupPage() {
         >
           <div className="card border-0 shadow my-2 p-2">
             <div className="card-body">
+              <ExpenseCategoryList
+                showToastMessage={showToastMessage}
+              ></ExpenseCategoryList>
               <ConfigList showToastMessage={showToastMessage}></ConfigList>
               <MiscConfigList
                 showToastMessage={showToastMessage}
@@ -1024,6 +1027,151 @@ function MiscConfigList({ showToastMessage }) {
   )
 }
 
+function ExpenseCategoryList({ showToastMessage }) {
+  const [categoryList, dispatch] = useReducer(expenseCategoryListReducer, [])
+  const changedIdList = useRef([])
+
+  useEffect(() => {
+    fetchList()
+  }, [])
+
+  function fetchList() {
+    fetch(`/expenseCategories`)
+      .then((data) => data.json())
+      .then((data) => {
+        // setTotal(data.count)
+        dispatch({
+          type: 'set',
+          data: data.data,
+        })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
+  function addRow() {
+    dispatch({
+      type: 'add',
+      category: '',
+    })
+  }
+
+  function save() {
+    const changedRows = changedIdList.current.map((x) => {
+      return categoryList.find((y) => y._id === x)
+    })
+    const newRows = categoryList.filter((x) => {
+      return !x._id
+    })
+    saveChangedRows(changedRows)
+    saveNewRows(newRows)
+  }
+
+  function saveNewRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/expenseCategories', {
+      method: 'POST',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function saveChangedRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/expenseCategories', {
+      method: 'PUT',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function handleChange(value, idx, field) {
+    if (
+      categoryList[idx]['_id'] &&
+      !changedIdList.current.find((x) => x === categoryList[idx]['_id'])
+    ) {
+      changedIdList.current.push(categoryList[idx]['_id'])
+    }
+    dispatch({
+      type: 'change',
+      idx,
+      field,
+      value,
+    })
+  }
+
+  return (
+    <div className="card-body">
+      <div className="card-header border-0 row justify-content-between white">
+        <h5 className="col-auto card-title">Expense Categories</h5>
+        <div className="col-2 d-flex flex-row-reverse justify-content-start">
+          <button className="btn btn-primary mx-1" onClick={save}>
+            Save
+          </button>
+          <button className="btn btn-primary mx-1" onClick={addRow}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="table table-hover card-body align-middle mb-0">
+        <thead className="table-light">
+          <tr>
+            <th scope="col" className="text-muted">
+              #
+            </th>
+            <th scope="col" className="text-muted">
+              Category
+            </th>
+          </tr>
+        </thead>
+        <tbody className="list">
+          {categoryList.map((item, idx) => (
+            <tr key={idx} className="">
+              <th scope="row" className="text-muted">
+                {idx + 1}
+              </th>
+              <td>
+                <input
+                  type="text"
+                  className="form-control w-25"
+                  value={item.category}
+                  onChange={(e) =>
+                    handleChange(e.target.value, idx, 'category')
+                  }
+                ></input>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function accountListReducer(accountList, action) {
   switch (action.type) {
     case 'set':
@@ -1108,5 +1256,28 @@ function miscListReducer(configList, action) {
       })
     default:
       console.log('miscListReducer: Invalid reducer action.')
+  }
+}
+
+function expenseCategoryListReducer(list, action) {
+  switch (action.type) {
+    case 'set':
+      return action.data
+    case 'add':
+      return [
+        {
+          category: action.category,
+        },
+        ...list,
+      ]
+    case 'change':
+      return list.map((item, idx) => {
+        if (idx === action.idx) {
+          item[action.field] = action.value
+        }
+        return item
+      })
+    default:
+      console.log('expenseCategoryListReducer: Invalid reducer action.')
   }
 }

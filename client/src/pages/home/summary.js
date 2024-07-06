@@ -5,6 +5,7 @@ export default function Summary(props) {
   let iconMap = {
     investment: 'bi-activity',
     'car-emi': 'bi-car-front',
+    car: 'bi-car-front',
     entertainment: 'bi-tv',
     groceries: 'bi-basket',
     phone: 'bi-telephone',
@@ -16,6 +17,8 @@ export default function Summary(props) {
     amazon: 'bi-cart',
     baby: 'bi-balloon',
     cat: 'bi-c-circle',
+    education: 'bi-pencil',
+    'home-essentials': 'bi-house-gear',
   }
 
   if (props.dateString) {
@@ -64,7 +67,7 @@ export default function Summary(props) {
         {props.total ? (
           <dl className="row mb-0">
             <dt className="col-7">
-              <i className="bi bi-receipt px-2"></i>Total Expense
+              <i className="bi bi-calculator px-2"></i>Total Expense
             </dt>
             <dd className="col-5">
               {props.total.toLocaleString('en-IN', {
