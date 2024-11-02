@@ -77,7 +77,7 @@ app.get('/fixedExpenses', (req, res, next) =>
 app.get('/graphByMonths', (req, res, next) => graphByMonths(req, res, next, db))
 app.post('/importFile', async (req, res) => {
   const { data, fileName, account } = req.body
-  const expenses = await importer.processFile(data, fileName, account, db)
+  const expenses = await importer.processFile(data, account, db)
   db.bulkCreateExpense(expenses)
     .then(() => {
       console.log('expense added')

@@ -20,6 +20,10 @@ const expenseSchema = new mongoose.Schema({
   },
   update_date: Date,
   parent_id: mongoose.ObjectId,
+  status: String,
+  year: Number,
+  month: Number,
+  exclude: Boolean,
 })
 const DB_HOST = process.env.DB_HOST
 const DB_NAME = process.env.DB_NAME

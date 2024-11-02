@@ -6,7 +6,7 @@ export default function Summary(props) {
     investment: 'bi-activity',
     'car-emi': 'bi-car-front',
     car: 'bi-car-front',
-    entertainment: 'bi-tv',
+    entertainment: 'bi-play-btn',
     groceries: 'bi-basket',
     phone: 'bi-telephone',
     electricity: 'bi-lightning-charge',
@@ -19,6 +19,7 @@ export default function Summary(props) {
     cat: 'bi-c-circle',
     education: 'bi-pencil',
     'home-essentials': 'bi-house-gear',
+    apparel: 'bi-tags',
   }
 
   if (props.dateString) {
@@ -46,7 +47,13 @@ export default function Summary(props) {
           ? props.aggregate.map((rec, idx) => {
               return (
                 <dl key={idx} className="row mb-1">
-                  <dt className="col-7">
+                  <dt
+                    className="col-7"
+                    style={{ cursor: 'pointer' }}
+                    onClick={(e) =>
+                      props.clearAndApplyFilter(rec._id, 'category')
+                    }
+                  >
                     <i className={getIconClass(rec._id)}></i>
                     {rec._id.replace(
                       rec._id.charAt(0),
@@ -80,8 +87,13 @@ export default function Summary(props) {
 
         {props.totalFixed ? (
           <dl className="row mt-4 mb-0">
-            <dt className="col-7">
-              <i className="bi bi-flag-fill px-2 text-primary"></i>Fixed Expense
+            <dt
+              className="col-7"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) => props.clearAndApplyFilter('fixed', 'priority')}
+            >
+              <i className="bi bi-cash-stack px-2 text-primary"></i>Fixed
+              Expense
             </dt>
             <dd className="col-5">
               {props.totalFixed.toLocaleString('en-IN', {
@@ -94,9 +106,15 @@ export default function Summary(props) {
 
         {props.totalNecessary ? (
           <dl className="row mb-0">
-            <dt className="col-7">
-              <i className="bi bi-flag-fill px-2 text-success"></i>Necessary
-              Expense
+            <dt
+              className="col-7"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) =>
+                props.clearAndApplyFilter('necessary', 'priority')
+              }
+            >
+              <i className="bi bi-cash-stack px-2 text-success"></i>
+              Necessary Expense
             </dt>
             <dd className="col-5">
               {props.totalNecessary.toLocaleString('en-IN', {
@@ -109,8 +127,14 @@ export default function Summary(props) {
 
         {props.totalAvoidable ? (
           <dl className="row mb-0">
-            <dt className="col-7">
-              <i className="bi bi-flag-fill px-2 text-danger"></i>Avoidable
+            <dt
+              className="col-7"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) =>
+                props.clearAndApplyFilter('avoidable', 'priority')
+              }
+            >
+              <i className="bi bi-cash-stack px-2 text-danger"></i>Avoidable
               Expense
             </dt>
             <dd className="col-5">
@@ -124,8 +148,12 @@ export default function Summary(props) {
 
         {props.totalDoesntHurt ? (
           <dl className="row mb-0">
-            <dt className="col-7">
-              <i className="bi bi-flag-fill px-2 text-secondary"></i>One-off
+            <dt
+              className="col-7"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) => props.clearAndApplyFilter('one-off', 'priority')}
+            >
+              <i className="bi bi-cash-stack px-2 text-secondary"></i>One-off
               Expense
             </dt>
             <dd className="col-5">
@@ -140,7 +168,7 @@ export default function Summary(props) {
         {props.credit ? (
           <dl className="row mb-0">
             <dt className="col-7">
-              <i className="bi bi-arrow-up px-2"></i>Credit
+              <i className="bi bi-box-arrow-in-down px-2"></i>Credit
             </dt>
             <dd className="col-5">
               {props.credit.toLocaleString('en-IN', {

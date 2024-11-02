@@ -22,6 +22,7 @@ export default function CardList(props) {
             saveRow={props.saveRow}
             checkRow={checkRow}
             dispatch={dispatch}
+            view={props.view}
           ></Card>
         )
       })}
@@ -37,6 +38,7 @@ function Card({
   checkRow,
   index,
   dispatch,
+  view,
 }) {
   const [isEdit, setIsEdit] = useState(false)
 
@@ -47,9 +49,10 @@ function Card({
       row[rowKey] = e.target.value
     }
     updateRow(row)
-    if (rowKey === 'category') {
+    if (rowKey === 'category' || rowKey === 'exclude') {
       const updateObj = {}
-      updateObj[rowKey] = e.target.value
+      updateObj[rowKey] =
+        rowKey === 'exclude' ? e.target.checked : e.target.value
       updateObj['_id'] = row._id
       saveRow(updateObj)
     }
@@ -93,33 +96,37 @@ function Card({
           <div className="col text-center">
             {new Date(row.date).toDateString()}
           </div>
-          <div className="col-1 text-end">
-            {isEdit ? (
-              <i
-                className="bi bi-check2"
-                type="button"
-                data-bs-title="Save"
-                onClick={() => setIsEdit(!isEdit)}
-              ></i>
-            ) : (
-              <small>
+          {view === 'list' ? (
+            <div className="col-1 text-end">
+              {isEdit ? (
                 <i
-                  className="bi bi-pencil"
+                  className="bi bi-check2"
                   type="button"
-                  data-bs-title="Edit"
+                  data-bs-title="Save"
                   onClick={() => setIsEdit(!isEdit)}
                 ></i>
+              ) : (
+                <small>
+                  <i
+                    className="bi bi-pencil"
+                    type="button"
+                    data-bs-title="Edit"
+                    onClick={() => setIsEdit(!isEdit)}
+                  ></i>
+                </small>
+              )}
+              <small>
+                <i
+                  className="bi bi-vr ms-2"
+                  type="button"
+                  data-bs-title="Split"
+                  onClick={() => toggleModal(row)}
+                ></i>
               </small>
-            )}
-            <small>
-              <i
-                className="bi bi-vr ms-2"
-                type="button"
-                data-bs-title="Split"
-                onClick={() => toggleModal(row)}
-              ></i>
-            </small>
-          </div>
+            </div>
+          ) : (
+            <div className="col-1 text-end">{row.items?.length}</div>
+          )}
         </div>
       </div>
       <div className="card-body">
@@ -161,24 +168,91 @@ function Card({
                 {row.expense_source}
               </div>
             )}
+            <div>
+              <input
+                class="form-check-input"
+                type="checkbox"
+                checked={row.exclude}
+                onChange={(e) => onChange(e, 'exclude')}
+                id="flexCheckDefault"
+                hidden={!isEdit && !row.exclude}
+                disabled={!isEdit}
+              ></input>
+              <label
+                class="form-check-label small ps-1"
+                for="flexCheckDefault"
+                hidden={!isEdit && !row.exclude}
+              >
+                Exclude from total
+              </label>
+            </div>
           </div>
           <div className="col-6 col-md-2 align-items-start text-end">
             <h6 className="card-title">
-              {(row.credit_amount * -1 || row.debit_amount).toLocaleString(
-                'en-IN',
-                {
-                  style: 'currency',
-                  currency: 'INR',
-                }
-              )}
+              {(view === 'list'
+                ? row.credit_amount * -1 || row.debit_amount
+                : row.amount
+              ).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+              })}
             </h6>
           </div>
         </div>
-        <p className="card-text">
+        {/* <div className="row pt-2">
           <small className="text-body-secondary">
             {row.source}/&nbsp;{row.details.substring(0, 20)}
           </small>
-        </p>
+        </div> */}
+        {view === 'group' && row.items?.length ? (
+          <div className="row form-control-sm justify-content-end">
+            <span className="col-auto text-end pe-0">Details</span>
+            <div className="col-auto text-end">
+              <i
+                className="bi bi-chevron-down"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target={'#expenseGroupList' + index}
+              ></i>
+            </div>
+            <div id={'expenseGroupList' + index} className="card-body collapse">
+              {row.items?.map((item) => {
+                return (
+                  <div className="row">
+                    <div className="col form-control-sm">
+                      {new Date(item.date).toDateString()}
+                    </div>
+                    <div className="col form-control-sm">
+                      {item.category.replace(
+                        item.category.charAt(0),
+                        item.category.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div className="col form-control-sm">
+                      {item.details.substring(0, 20)}
+                    </div>
+                    <div className="col text-end">
+                      {(
+                        item.credit_amount * -1 || item.debit_amount
+                      ).toLocaleString('en-IN', {
+                        style: 'currency',
+                        currency: 'INR',
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          ''
+        )}
+      </div>
+      <div className="card-footer">
+        <small className="text-body-secondary" title={row.details}>
+          {row.source}&nbsp;/&nbsp;{row.details.substring(0, 30)}
+          {row.details.length > 30 ? '...' : ''}
+        </small>
       </div>
     </div>
   )

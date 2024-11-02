@@ -8,6 +8,7 @@ export default function HomePage() {
   const [monthList, setMonthList] = useState([])
   const [expenses, setExpenses] = useState([])
   const [filteredExpenses, setFilteredExpenses] = useState([])
+  const [groupedExpenses, setGroupedExpenses] = useState([])
   const [aggregates, setAggregates] = useState([])
   const [date, setDate] = useState(new Date().setDate(1))
   const [total, setTotal] = useState(0)
@@ -83,11 +84,16 @@ export default function HomePage() {
     tagExpenses(data.expenses)
     if (data.aggregate && data.aggregate.length) {
       total = data.aggregate.reduce((sum, rec) => {
-        return sum + (rec._id == 'investment' ? 0 : parseFloat(rec.total))
+        return (
+          sum +
+          (rec._id == 'investment' || rec.exclude === true
+            ? 0
+            : parseFloat(rec.total))
+        )
       }, 0)
     }
     setExpenses(data.expenses)
-    setFilteredExpenses(data.expenses)
+    filterExpenses(data.expenses)
     setAggregates(data.aggregate)
     setTotal(total)
     setTotalFixed(
@@ -119,6 +125,82 @@ export default function HomePage() {
     setResetFilter(true)
   }
 
+  function groupExpenses(expenses) {
+    const expenseGroup = {}
+    const groupedList = []
+    expenses.forEach((expense) => {
+      if (expense.expense_source) {
+        if (expenseGroup[expense.expense_source.toLowerCase()]) {
+          expenseGroup[expense.expense_source.toLowerCase()].amount +=
+            expense.credit_amount * -1 || expense.debit_amount
+          expenseGroup[expense.expense_source.toLowerCase()].items.push(expense)
+        } else {
+          expenseGroup[expense.expense_source.toLowerCase()] = {
+            expense_source: expense.expense_source,
+            amount: expense.credit_amount * -1 || expense.debit_amount,
+            items: [expense],
+          }
+        }
+      }
+    })
+
+    expenses.forEach((expense) => {
+      if (
+        expense.expense_source &&
+        expenseGroup[expense.expense_source.toLowerCase()]
+      ) {
+        if (
+          groupedList.findIndex(
+            (item) =>
+              item.expense_source === expense.expense_source &&
+              item.category === expense.category
+          ) === -1
+        ) {
+          if (
+            expenseGroup[expense.expense_source.toLowerCase()].items.length > 1
+          ) {
+            groupedList.push(
+              Object.assign(
+                structuredClone({
+                  ...expense,
+                  amount:
+                    expenseGroup[expense.expense_source.toLowerCase()].amount,
+                }),
+                {
+                  items:
+                    expenseGroup[expense.expense_source.toLowerCase()].items,
+                }
+              )
+            )
+          } else {
+            groupedList.push(
+              Object.assign(
+                structuredClone({
+                  ...expense,
+                  amount: expense.credit_amount * -1 || expense.debit_amount,
+                })
+              )
+            )
+          }
+        }
+      } else {
+        groupedList.push(
+          Object.assign(
+            structuredClone({
+              ...expense,
+              amount: expense.credit_amount * -1 || expense.debit_amount,
+            })
+          )
+        )
+      }
+    })
+    return groupedList
+  }
+
+  function filterExpenses(rows) {
+    setFilteredExpenses(rows)
+    setGroupedExpenses(groupExpenses(rows))
+  }
   function fetchMonthBalances() {
     fetch('/getMonthBalance' + '?startDate=' + new Date(date).toJSON())
       .then((data) => {
@@ -145,6 +227,8 @@ export default function HomePage() {
           'maid',
           'gail',
           'cook',
+          'bisna',
+          'saraswati',
         ]
         for (let i = 0; i < fixeds.length; i++) {
           if (expense.expense_source.toLowerCase().includes(fixeds[i])) {
@@ -218,7 +302,7 @@ export default function HomePage() {
     const tempRows = filteredExpenses.map((x, idx) =>
       changedIdx === idx ? row : x
     )
-    setFilteredExpenses(tempRows)
+    filterExpenses(tempRows)
   }
 
   async function saveRow(row) {
@@ -253,10 +337,10 @@ export default function HomePage() {
               : x[key] == filterState[key]
           )
         })
-        setFilteredExpenses(filteredExpenses)
+        filterExpenses(filteredExpenses)
         setFilter(filterState)
       } else {
-        setFilteredExpenses(expenses)
+        filterExpenses(expenses)
         setFilter(filterState)
       }
     }
@@ -264,10 +348,16 @@ export default function HomePage() {
 
   function keywordSearch(keyword, expense) {
     return (
-      expense.details.toLowerCase().includes(keyword) ||
-      expense.source.toLowerCase().includes(keyword) ||
-      expense.expense_source.toLowerCase().includes(keyword)
+      expense.details?.toLowerCase().includes(keyword) ||
+      expense.source?.toLowerCase().includes(keyword) ||
+      expense.expense_source?.toLowerCase().includes(keyword) ||
+      expense.expense_category?.toLowerCase().includes(keyword)
     )
+  }
+
+  function clearAndApplyFilter(value, criteria) {
+    setFilter({})
+    handleLocalSearch(value, criteria)
   }
 
   async function handleSelectMonth(e) {
@@ -293,6 +383,7 @@ export default function HomePage() {
 
   function refreshPage() {
     fetchExpenses()
+    setFilter({})
   }
 
   return (
@@ -345,6 +436,7 @@ export default function HomePage() {
               salary={salary}
               openingBalance={openingBalance}
               closingBalance={closingBalance}
+              clearAndApplyFilter={clearAndApplyFilter}
             ></Summary>
           </div>
           <div className="col-12 col-md-8">
@@ -356,9 +448,9 @@ export default function HomePage() {
               }
               updateRow={(row) => updateRow(row)}
               saveRow={(row) => saveRow(row)}
-              resetFilter={resetFilter}
-              setResetFilter={setResetFilter}
+              filter={filter}
               keywordSearch={(keyword) => keywordSearch(keyword)}
+              groupedExpenses={groupedExpenses}
             ></ExpenseList>
           </div>
         </div>

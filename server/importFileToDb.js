@@ -35,7 +35,7 @@ const format = (currentDate, source) => {
   const currentYear =
     source === 'hdfc account'
       ? `20${currentDate.split('/')[2]}`
-      : currentDate.split('/')[2]
+      : currentDate.split(' ')[0].split('/')[2]
   return new Date(
     `${currentYear}/${currentDate.split('/')[1]}/${currentDate.split('/')[0]}`
   )
@@ -46,9 +46,11 @@ const formatDates = (data) => {
   if (data.hasOwnProperty('value_dat')) {
     data['value_dat'] = format(data['value_dat'], data['source'])
   }
+  data.year = data['date'].getFullYear()
+  data.month = data['date'].getMonth() + 1
 }
 
-const process = async (data, filename, account, db) => {
+const process = async (data, account, db) => {
   for (let i = 0; i < data.length; i++) {
     let trx_type = 'debit'
     const row = data[i]
@@ -56,34 +58,38 @@ const process = async (data, filename, account, db) => {
       delete row['']
     }
     row['source'] = account
-    if (account === 'hdfc credit card') {
-      if (row['transaction_type']) {
-        trx_type = row['transaction_type'] === 'Cr' ? 'credit' : 'debit'
-      } else {
-        trx_type = row['amount'].includes('Cr') ? 'credit' : 'debit'
-        row['amount'] = row['amount'].split('Cr')[0]
-      }
-      row['debit_amount'] = parseFloat(0)
-      row['credit_amount'] = parseFloat(0)
+    switch (account) {
+      case 'hdfc credit card':
+        if (row['transaction_type']) {
+          trx_type = row['transaction_type'] === 'Cr' ? 'credit' : 'debit'
+        } else {
+          trx_type = row['amount'].includes('Cr') ? 'credit' : 'debit'
+          row['amount'] = row['amount'].split('Cr')[0]
+        }
+        row['debit_amount'] = parseFloat(0)
+        row['credit_amount'] = parseFloat(0)
 
-      if (trx_type == 'debit') {
-        row['debit_amount'] = parseFloat(row['amount'].replace(',', ''))
-      } else {
-        row['credit_amount'] = parseFloat(row['amount'].replace(',', ''))
-      }
-      row['date'] = row['date'].split(' ')[0]
-    } else if (account === 'hdfc account') {
-      trx_type = parseFloat(row['debit_amount']) ? 'debit' : 'credit'
-    } else if (account === 'icici credit card') {
-      if (row['amount'].includes(' Dr.')) {
-        row['debit_amount'] = row['amount'].replace(',', '').split(' Dr.')[0]
-      }
-      if (row['amount'].includes(' Cr.')) {
-        row['credit_amount'] = row['amount'].replace(',', '').split(' Cr.')[0]
-        trx_type = 'credit'
-      }
-      delete row['amount']
+        if (trx_type == 'debit') {
+          row['debit_amount'] = parseFloat(row['amount'].replace(',', ''))
+        } else {
+          row['credit_amount'] = parseFloat(row['amount'].replace(',', ''))
+        }
+        break
+      case 'hdfc account':
+        trx_type = parseFloat(row['debit_amount']) ? 'debit' : 'credit'
+        break
+      case 'icici credit card':
+        if (row['amount'].includes(' Dr.')) {
+          row['debit_amount'] = row['amount'].replace(',', '').split(' Dr.')[0]
+        }
+        if (row['amount'].includes(' Cr.')) {
+          row['credit_amount'] = row['amount'].replace(',', '').split(' Cr.')[0]
+          trx_type = 'credit'
+        }
+        delete row['amount']
+        break
     }
+
     await tagCategory(row, db)
     row['trx_type'] = trx_type
     formatDates(row)

@@ -3,10 +3,18 @@ const totalClause = {
   $sum: {
     $cond: [
       {
-        $gt: ['$debit_amount', 0],
+        $eq: ['$exclude', true],
       },
-      '$debit_amount',
-      { $multiply: ['$credit_amount', -1] },
+      0,
+      {
+        $cond: [
+          {
+            $gt: ['$debit_amount', 0],
+          },
+          '$debit_amount',
+          { $multiply: ['$credit_amount', -1] },
+        ],
+      },
     ],
   },
 }
@@ -31,6 +39,9 @@ const getExpenses = async (req, res, next, db) => {
       date: dateClause,
       details: {
         $nin: appMetadata.ignoredExpenses,
+      },
+      expense_source: {
+        $ne: 'ora sal',
       },
     })
     const pipelines = [
