@@ -5,6 +5,7 @@ import { Provider } from 'react-redux'
 import HomePage from './pages/home/home'
 import SetupPage from './pages/setup'
 import AnalyticsPage from './pages/analytics'
+import PortFolioPage from './pages/portfolio'
 import store from '../lib/store'
 
 class App extends React.Component {
@@ -40,6 +41,14 @@ class App extends React.Component {
       })
       this.switchPage(main)
     })
+
+    const portfolioLink = document.getElementById('portfolioLink')
+    portfolioLink.addEventListener('click', async () => {
+      await this.setState({
+        currentPage: 'PortFolioPage',
+      })
+      this.switchPage(main)
+    })
     this.switchPage(main)
   }
 
@@ -54,6 +63,9 @@ class App extends React.Component {
         break
       case 'AnalyticsPage':
         main.render(<AnalyticsPage />)
+        break
+      case 'PortFolioPage':
+        main.render(<PortFolioPage />)
         break
     }
   }
@@ -95,6 +107,11 @@ class App extends React.Component {
               <li className="nav-item">
                 <a id="analyticsLink" className="nav-link" href="#analytics">
                   Analytics
+                </a>
+              </li>
+              <li className="nav-item">
+                <a id="portfolioLink" className="nav-link" href="#portfolio">
+                  Portfolio
                 </a>
               </li>
             </ul>

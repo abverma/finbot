@@ -5,7 +5,7 @@ export default class AnalyticsPage extends React.Component {
     super(props)
   }
   async componentDidMount() {
-    const ctx = document.getElementById('myChart')
+    const ctx = document.getElementById('analyticsChart')
     const data = await this.fetchData()
     new Chart(ctx, {
       type: 'line',
@@ -41,7 +41,7 @@ export default class AnalyticsPage extends React.Component {
       <div className="container p-3 m-auto">
         <div>
           <canvas
-            id="myChart"
+            id="analyticsChart"
             style={{ position: 'relative', height: '40vh', width: '60vw' }}
           ></canvas>
         </div>

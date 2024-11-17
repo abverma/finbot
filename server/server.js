@@ -38,6 +38,7 @@ const {
   addMiscellaneousCatchwords,
   addExpenseCategory,
   updateExpenseCategory,
+  getMutualFunds,
 } = require('./route')
 const { convert } = require('./readFile')
 const exp = require('constants')
@@ -155,6 +156,7 @@ app.put('/convertPdf', upload.any(), async (req, res) => {
     res.send(e)
   }
 })
+app.get('/mutualfunds', (req, res, next) => getMutualFunds(req, res, next, db))
 
 app.listen(3001, async () => {
   try {

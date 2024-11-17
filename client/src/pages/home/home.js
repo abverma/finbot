@@ -96,25 +96,19 @@ export default function HomePage() {
     filterExpenses(data.expenses)
     setAggregates(data.aggregate)
     setTotal(total)
+    const reducer = (p, c) =>
+      p + (c.credit_amount ? -1 * c.credit_amount : c.debit_amount)
     setTotalFixed(
-      data.expenses
-        .filter((x) => x.priority === 'fixed')
-        .reduce((p, c) => p + c.debit_amount, 0)
+      data.expenses.filter((x) => x.priority === 'fixed').reduce(reducer, 0)
     )
     setTotalNecessary(
-      data.expenses
-        .filter((x) => x.priority === 'necessary')
-        .reduce((p, c) => p + c.debit_amount, 0)
+      data.expenses.filter((x) => x.priority === 'necessary').reduce(reducer, 0)
     )
     setTotalAvoidable(
-      data.expenses
-        .filter((x) => x.priority === 'avoidable')
-        .reduce((p, c) => p + c.debit_amount, 0)
+      data.expenses.filter((x) => x.priority === 'avoidable').reduce(reducer, 0)
     )
     setTotalDoesntHurt(
-      data.expenses
-        .filter((x) => x.priority === 'one-off')
-        .reduce((p, c) => p + c.debit_amount, 0)
+      data.expenses.filter((x) => x.priority === 'one-off').reduce(reducer, 0)
     )
     setCredit(
       data.expenses
@@ -130,12 +124,19 @@ export default function HomePage() {
     const groupedList = []
     expenses.forEach((expense) => {
       if (expense.expense_source) {
-        if (expenseGroup[expense.expense_source.toLowerCase()]) {
-          expenseGroup[expense.expense_source.toLowerCase()].amount +=
+        const expenseSource = expense.expense_source.toLowerCase()
+        if (
+          expenseGroup[expenseSource] &&
+          expenseGroup[expenseSource][expense.category]
+        ) {
+          expenseGroup[expenseSource][expense.category].amount +=
             expense.credit_amount * -1 || expense.debit_amount
-          expenseGroup[expense.expense_source.toLowerCase()].items.push(expense)
+          expenseGroup[expenseSource][expense.category].items.push(expense)
         } else {
-          expenseGroup[expense.expense_source.toLowerCase()] = {
+          if (!expenseGroup[expenseSource]) {
+            expenseGroup[expenseSource] = {}
+          }
+          expenseGroup[expenseSource][expense.category] = {
             expense_source: expense.expense_source,
             amount: expense.credit_amount * -1 || expense.debit_amount,
             items: [expense],
@@ -145,30 +146,29 @@ export default function HomePage() {
     })
 
     expenses.forEach((expense) => {
-      if (
-        expense.expense_source &&
-        expenseGroup[expense.expense_source.toLowerCase()]
-      ) {
+      const expenseSource = expense.expense_source.toLowerCase()
+      const expenseCategory = expense.category
+      if (expense.expense_source && expenseGroup[expenseSource]) {
         if (
           groupedList.findIndex(
             (item) =>
-              item.expense_source === expense.expense_source &&
-              item.category === expense.category
+              item.expense_source.toLowerCase() ===
+                expense.expense_source.toLowerCase() &&
+              item.category === expenseCategory
           ) === -1
         ) {
           if (
-            expenseGroup[expense.expense_source.toLowerCase()].items.length > 1
+            expenseGroup[expenseSource][expenseCategory] &&
+            expenseGroup[expenseSource][expenseCategory].items.length > 1
           ) {
             groupedList.push(
               Object.assign(
                 structuredClone({
                   ...expense,
-                  amount:
-                    expenseGroup[expense.expense_source.toLowerCase()].amount,
+                  amount: expenseGroup[expenseSource][expenseCategory].amount,
                 }),
                 {
-                  items:
-                    expenseGroup[expense.expense_source.toLowerCase()].items,
+                  items: expenseGroup[expenseSource][expenseCategory].items,
                 }
               )
             )
@@ -254,7 +254,6 @@ export default function HomePage() {
       expenses.forEach((expense) => {
         if (
           (!expense.priority &&
-            expense.trx_type !== 'credit' &&
             ['groceries', 'medical'].includes(expense.category)) ||
           [
             'hair cut',
@@ -288,8 +287,16 @@ export default function HomePage() {
               'car service',
               'loan',
               'one-off',
+              'indigo',
+              'chimney',
+              'cab',
             ].includes(expense.expense_source)) ||
-          expense.expense_source.includes('one-off')
+          expense.expense_source.includes('one-off') ||
+          expense.expense_source.includes('tickets') ||
+          expense.expense_source.includes('airport') ||
+          expense.expense_source.includes('rent') ||
+          expense.expense_source.includes('firstcry') ||
+          expense.expense_source.includes('yatra')
         ) {
           expense['priority'] = 'one-off'
         }

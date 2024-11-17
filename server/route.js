@@ -40,9 +40,9 @@ const getExpenses = async (req, res, next, db) => {
       details: {
         $nin: appMetadata.ignoredExpenses,
       },
-      expense_source: {
-        $ne: 'ora sal',
-      },
+      // expense_source: {
+      //   $ne: 'ora sal',
+      // },
     })
     const pipelines = [
       {
@@ -545,6 +545,24 @@ const updateMiscellaneousCatchwords = async (req, res, next, db) => {
   }
 }
 
+const getMutualFunds = async (req, res, next, db) => {
+  try {
+    const result = await db.queryMutualFunds(
+      req.query,
+      req.query.start,
+      req.query.limit
+    )
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
 module.exports = {
   getExpenses,
   graphByMonths,
@@ -567,4 +585,5 @@ module.exports = {
   addMiscellaneousCatchwords,
   addExpenseCategory,
   updateExpenseCategory,
+  getMutualFunds,
 }

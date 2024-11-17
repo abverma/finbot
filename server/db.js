@@ -61,6 +61,15 @@ const IgnoredExpenses = mongoose.model('ignored_expenses', {
   desc: String,
 })
 
+const MutualFunds = mongoose.model('mutual_funds', {
+  name: String,
+  date: Date,
+  invested_value: Number,
+  current_value: Number,
+  type: String,
+  creation_date: Date,
+})
+
 const connect = async function () {
   // await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
   await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
@@ -164,6 +173,10 @@ const addExpenseCategory = async (list) => {
 const updateExpenseCategory = async (query, item) => {
   return ExpenseCategories.updateOne(query, item)
 }
+
+const queryMutualFunds = async (query) => {
+  return MutualFunds.find(query).sort({ date: -1 })
+}
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -207,4 +220,5 @@ module.exports = {
   queryIgnoredExpenses,
   addExpenseCategory,
   updateExpenseCategory,
+  queryMutualFunds,
 }

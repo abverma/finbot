@@ -170,7 +170,7 @@ function Card({
             )}
             <div>
               <input
-                class="form-check-input"
+                className="form-check-input"
                 type="checkbox"
                 checked={row.exclude}
                 onChange={(e) => onChange(e, 'exclude')}
@@ -179,8 +179,8 @@ function Card({
                 disabled={!isEdit}
               ></input>
               <label
-                class="form-check-label small ps-1"
-                for="flexCheckDefault"
+                className="form-check-label small ps-1"
+                htmlFor="flexCheckDefault"
                 hidden={!isEdit && !row.exclude}
               >
                 Exclude from total
