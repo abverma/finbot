@@ -35,6 +35,16 @@ const Months = mongoose.model('list_of_months', {
   value: String,
   label: String,
   enabled: Boolean,
+  from: Date,
+  to: Date,
+})
+
+const Years = mongoose.model('list_of_years', {
+  value: String,
+  label: String,
+  enabled: Boolean,
+  from: Date,
+  to: Date,
 })
 
 const ExpenseCategories = mongoose.model('expense_categories', {
@@ -120,6 +130,22 @@ const addMonth = async (list) => {
 
 const updateMonths = async (query, item) => {
   return Months.updateOne(query, item)
+}
+
+const queryYears = async (query, start = 0, limit = 25) => {
+  return Years.find(query).skip(start).limit(limit).sort({ _id: -1 })
+}
+
+const getTotalYears = async (query) => {
+  return Years.count(query)
+}
+
+const addYear = async (list) => {
+  return Years.insertMany(list)
+}
+
+const updateYears = async (query, item) => {
+  return Years.updateOne(query, item)
 }
 
 const queryExpenseCategories = async (query) => {
@@ -221,4 +247,8 @@ module.exports = {
   addExpenseCategory,
   updateExpenseCategory,
   queryMutualFunds,
+  queryYears,
+  addYear,
+  updateYears,
+  getTotalYears,
 }

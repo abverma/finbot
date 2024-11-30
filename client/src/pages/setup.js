@@ -114,6 +114,7 @@ export default function SetupPage() {
           <div className="card border-0 shadow my-2 p-2">
             <div className="card-body">
               <MonthList showToastMessage={showToastMessage}></MonthList>
+              <YearList showToastMessage={showToastMessage}></YearList>
               <AccountList
                 accountList={accountList}
                 dispatch={dispatch}
@@ -507,6 +508,12 @@ function MonthList({ showToastMessage }) {
               Value
             </th>
             <th scope="col" className="text-muted">
+              From
+            </th>
+            <th scope="col" className="text-muted">
+              To
+            </th>
+            <th scope="col" className="text-muted">
               Enabled
             </th>
           </tr>
@@ -535,6 +542,22 @@ function MonthList({ showToastMessage }) {
               </td>
               <td>
                 <input
+                  type="text"
+                  className="form-control"
+                  value={item.from}
+                  onChange={(e) => handleChange(e.target.value, idx, 'from')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.to}
+                  onChange={(e) => handleChange(e.target.value, idx, 'to')}
+                ></input>
+              </td>
+              <td>
+                <input
                   className="form-check-input mt-0"
                   type="checkbox"
                   checked={item.enabled}
@@ -550,6 +573,216 @@ function MonthList({ showToastMessage }) {
       <div className="card-header row border-0 align-items-center justify-content-end white">
         <small className="col-md-2 col-6 text-end">
           Showing {monthList.length} of {total}
+        </small>
+        <div className="col-md-1 col-3 d-flex">
+          <button className="btn border me-1" type="button">
+            <i className="bi bi-chevron-left"></i>
+          </button>
+          <button className="btn border" type="button" onClick={(e) => next()}>
+            <i className="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function YearList({ showToastMessage }) {
+  const [yearList, dispatch] = useReducer(yearListReducer, [])
+  const changedIdList = useRef([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    fetchYearList()
+  }, [page])
+
+  function fetchYearList() {
+    fetch(`/yearList?start=${(page - 1) * 10}&limit=10`)
+      .then((data) => data.json())
+      .then((data) => {
+        setTotal(data.count)
+        dispatch({
+          type: 'set',
+          data: data.data,
+        })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
+  function addRow() {
+    dispatch({
+      type: 'add',
+      label: '',
+      value: '',
+      enabled: false,
+    })
+  }
+
+  function save() {
+    const changedRows = changedIdList.current.map((x) => {
+      return yearList.find((y) => y._id === x)
+    })
+    const newRows = yearList.filter((x) => {
+      return !x._id
+    })
+    saveChangedRows(changedRows)
+    saveNewRows(newRows)
+  }
+
+  function saveNewRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/yearList', {
+      method: 'POST',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function saveChangedRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/yearList', {
+      method: 'PUT',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function handleChange(value, idx, field) {
+    if (
+      yearList[idx]['_id'] &&
+      !changedIdList.current.find((x) => x === yearList[idx]['_id'])
+    ) {
+      changedIdList.current.push(yearList[idx]['_id'])
+    }
+    dispatch({
+      type: 'change',
+      idx,
+      field,
+      value,
+    })
+  }
+
+  function next() {
+    setPage(page + 1)
+  }
+
+  return (
+    <div className="card-body">
+      <div className="card-header border-0 row justify-content-between white px-0 px-md-3">
+        <h5 className="col-auto card-title">Years</h5>
+        <div className="col-2 d-flex flex-row-reverse justify-content-start">
+          <button className="btn btn-primary mx-1" onClick={save}>
+            Save
+          </button>
+          <button className="btn btn-primary mx-1" onClick={addRow}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="table table-hover card-body align-middle mb-0">
+        <thead className="table-light">
+          <tr>
+            <th scope="col" className="text-muted">
+              #
+            </th>
+            <th scope="col" className="text-muted">
+              Label
+            </th>
+            <th scope="col" className="text-muted">
+              Value
+            </th>
+            <th scope="col" className="text-muted">
+              From
+            </th>
+            <th scope="col" className="text-muted">
+              To
+            </th>
+            <th scope="col" className="text-muted">
+              Enabled
+            </th>
+          </tr>
+        </thead>
+        <tbody className="list">
+          {yearList.map((item, idx) => (
+            <tr key={idx}>
+              <th scope="row" className="text-muted">
+                {idx + 1}
+              </th>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.label}
+                  onChange={(e) => handleChange(e.target.value, idx, 'label')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.value}
+                  onChange={(e) => handleChange(e.target.value, idx, 'value')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.from}
+                  onChange={(e) => handleChange(e.target.value, idx, 'from')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.to}
+                  onChange={(e) => handleChange(e.target.value, idx, 'to')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  className="form-check-input mt-0"
+                  type="checkbox"
+                  checked={item.enabled}
+                  onChange={(e) =>
+                    handleChange(e.target.checked, idx, 'enabled')
+                  }
+                ></input>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="card-header row border-0 align-items-center justify-content-end white">
+        <small className="col-md-2 col-6 text-end">
+          Showing {yearList.length} of {total}
         </small>
         <div className="col-md-1 col-3 d-flex">
           <button className="btn border me-1" type="button">
@@ -1211,6 +1444,27 @@ function monthListReducer(monthList, action) {
       })
     default:
       console.log('monthListReducer: Invalid reducer action.')
+  }
+}
+
+function yearListReducer(yearList, action) {
+  switch (action.type) {
+    case 'set':
+      return action.data
+    case 'add':
+      return [
+        { value: action.value, label: action.label, enabled: action.enabled },
+        ...yearList,
+      ]
+    case 'change':
+      return yearList.map((item, idx) => {
+        if (idx === action.idx) {
+          item[action.field] = action.value
+        }
+        return item
+      })
+    default:
+      console.log('yearListReducer: Invalid reducer action.')
   }
 }
 

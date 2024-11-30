@@ -100,8 +100,8 @@ class App extends React.Component {
                 </a>
               </li>
               <li className="nav-item">
-                <a id="setupLink" className="nav-link" href="#setup">
-                  Setup
+                <a id="portfolioLink" className="nav-link" href="#portfolio">
+                  Portfolio
                 </a>
               </li>
               <li className="nav-item">
@@ -110,8 +110,8 @@ class App extends React.Component {
                 </a>
               </li>
               <li className="nav-item">
-                <a id="portfolioLink" className="nav-link" href="#portfolio">
-                  Portfolio
+                <a id="setupLink" className="nav-link" href="#setup">
+                  Setup
                 </a>
               </li>
             </ul>

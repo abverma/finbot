@@ -10,7 +10,7 @@ export default function HomePage() {
   const [filteredExpenses, setFilteredExpenses] = useState([])
   const [groupedExpenses, setGroupedExpenses] = useState([])
   const [aggregates, setAggregates] = useState([])
-  const [date, setDate] = useState(new Date().setDate(1))
+  const [date, setDate] = useState()
   const [total, setTotal] = useState(0)
   const [filter, setFilter] = useState({})
   const [totalFixed, setTotalFixed] = useState(0)
@@ -22,18 +22,24 @@ export default function HomePage() {
   const [openingBalance, setOpeningBalance] = useState(0)
   const [closingBalance, setClosingBalance] = useState(0)
   const [resetFilter, setResetFilter] = useState(false)
+  const [year, setYear] = useState()
+  const [yearList, setYearList] = useState([])
 
   useEffect(() => {
-    fetchExpenses()
-    fetchMonthBalances()
     fetchMonthList()
+    fetchYearList()
+
+    if (date || year) {
+      fetchExpenses()
+      fetchPeriodBalances()
+    }
     const tooltipTriggerList = document.querySelectorAll(
       '[data-bs-toggle="tooltip"]'
     )
     const tooltipList = [...tooltipTriggerList].map(
       (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
     )
-  }, [date])
+  }, [date, year])
 
   function fetchMonthList() {
     fetch('/monthList?enabled=true')
@@ -46,8 +52,24 @@ export default function HomePage() {
       })
   }
 
+  function fetchYearList() {
+    fetch('/yearList?enabled=true')
+      .then((data) => data.json())
+      .then((data) => {
+        setYearList(data.data)
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
   function fetchExpenses() {
-    let url = `/expenses?startDate=${new Date(date).toJSON()}`
+    let url = `/expenses`
+    if (date) {
+      url += `?date=${date}`
+    } else if (year) {
+      url += `?year=${year}`
+    }
     fetch(url)
       .then((data) => {
         return data.json()
@@ -115,7 +137,11 @@ export default function HomePage() {
         .filter((x) => x.trx_type === 'credit' && x.category !== 'salary')
         .reduce((p, c) => p + c.credit_amount, 0)
     )
-    setSalary(data.expenses.find((x) => x.category === 'salary')?.credit_amount)
+    setSalary(
+      data.expenses
+        .filter((x) => x.trx_type === 'credit' && x.category === 'salary')
+        .reduce((p, c) => p + c.credit_amount, 0)
+    )
     setResetFilter(true)
   }
 
@@ -201,8 +227,14 @@ export default function HomePage() {
     setFilteredExpenses(rows)
     setGroupedExpenses(groupExpenses(rows))
   }
-  function fetchMonthBalances() {
-    fetch('/getMonthBalance' + '?startDate=' + new Date(date).toJSON())
+  function fetchPeriodBalances() {
+    let url = '/getPeriodBalance'
+    if (date) {
+      url += `?date=${date}`
+    } else if (year) {
+      url += `?year=${year}`
+    }
+    fetch(url)
       .then((data) => {
         return data.json()
       })
@@ -370,6 +402,14 @@ export default function HomePage() {
   async function handleSelectMonth(e) {
     if (e.target.value) {
       setDate(e.target.value)
+      setYear('')
+    }
+  }
+
+  async function handleSelectYear(e) {
+    if (e.target.value) {
+      setDate('')
+      setYear(e.target.value)
     }
   }
 
@@ -381,7 +421,7 @@ export default function HomePage() {
   function handleClearSearch() {
     if (date) {
       fetchExpenses()
-      fetchMonthBalances()
+      fetchPeriodBalances()
     } else {
       setDate(new Date().setDate(1))
       loadPage({ expenses: [] })
@@ -403,11 +443,30 @@ export default function HomePage() {
               className="form-select form-select-md m-2"
               aria-label="Default select example"
               onChange={(e) => handleSelectMonth(e)}
+              value={date}
             >
               <option defaultValue value="">
-                Select month
+                Select Month
               </option>
-              {monthList.map((x) => (
+              {monthList.map((x, idx) => (
+                <option key={x._id} value={x.value}>
+                  {x.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="ps-0 col-10 col-md-2">
+            <select
+              id="selectYear"
+              className="form-select form-select-md m-2"
+              aria-label="Default select example"
+              onChange={(e) => handleSelectYear(e)}
+              value={year}
+            >
+              <option defaultValue value="">
+                Select Year
+              </option>
+              {yearList.map((x) => (
                 <option key={x._id} value={x.value}>
                   {x.label}
                 </option>
@@ -434,6 +493,7 @@ export default function HomePage() {
             <Summary
               aggregate={aggregates}
               dateString={date}
+              year={year}
               total={total}
               totalFixed={totalFixed}
               totalNecessary={totalNecessary}
@@ -450,6 +510,7 @@ export default function HomePage() {
             <ExpenseList
               expenses={filteredExpenses}
               dateString={date}
+              year={year}
               handleLocalSearch={(value, filter) =>
                 handleLocalSearch(value, filter)
               }

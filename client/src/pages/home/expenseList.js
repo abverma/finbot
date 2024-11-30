@@ -23,6 +23,8 @@ export default function ExpenseList(props) {
         { month: 'long' }
       )} ${new Date(props.dateString).getFullYear()}`
       setTitleDateString(dateString)
+    } else {
+      setTitleDateString(props.year)
     }
 
     fetch('/accounts')
@@ -42,7 +44,7 @@ export default function ExpenseList(props) {
       .catch((e) => {
         console.log(e)
       })
-  }, [props.dateString])
+  }, [props.dateString, props.year])
 
   function handleKeywordSearch(value) {
     props.handleLocalSearch(value ?? value.toLowerCase(), 'keyword')

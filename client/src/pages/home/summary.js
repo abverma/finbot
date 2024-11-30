@@ -14,7 +14,7 @@ export default function Summary(props) {
       new Date(props.dateString).toLocaleString('en-US', { month: 'long' }) +
       ' ' +
       new Date(props.dateString).getFullYear()
-    : ''
+    : props.year
   const chartData = {
     labels: dataSet.map((x) => x._id),
     datasets: [

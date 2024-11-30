@@ -21,7 +21,7 @@ const {
   graphByMonths,
   updateExpense,
   getFixedExpenses,
-  getMonthBalance,
+  getPeriodBalance,
   searchExpenses,
   getMonthList,
   addToMonthList,
@@ -39,6 +39,9 @@ const {
   addExpenseCategory,
   updateExpenseCategory,
   getMutualFunds,
+  getYearList,
+  addToYearList,
+  updateYearList,
 } = require('./route')
 const { convert } = require('./readFile')
 const exp = require('constants')
@@ -106,8 +109,8 @@ app.post('/importFile', async (req, res) => {
       }
     })
 })
-app.get('/getMonthBalance', (req, res, next) =>
-  getMonthBalance(req, res, next, db)
+app.get('/getPeriodBalance', (req, res, next) =>
+  getPeriodBalance(req, res, next, db)
 )
 app.get('/searchExpenses', (req, res, next) =>
   searchExpenses(req, res, next, db)
@@ -115,6 +118,9 @@ app.get('/searchExpenses', (req, res, next) =>
 app.get('/monthList', (req, res, next) => getMonthList(req, res, next, db))
 app.post('/monthList', (req, res, next) => addToMonthList(req, res, next, db))
 app.put('/monthList', (req, res, next) => updateMonthList(req, res, next, db))
+app.get('/yearList', (req, res, next) => getYearList(req, res, next, db))
+app.post('/yearList', (req, res, next) => addToYearList(req, res, next, db))
+app.put('/yearList', (req, res, next) => updateYearList(req, res, next, db))
 app.get('/expenseCategories', (req, res, next) =>
   getExpenseCategories(req, res, next, db)
 )

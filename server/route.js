@@ -20,20 +20,33 @@ const totalClause = {
 }
 
 const getExpenses = async (req, res, next, db) => {
-  const startDate = new Date(req.query.startDate)
-  startDate.setHours(0)
-  // startDate.setDate(new Date(startDate).getDate() - 1)
+  let periodObj, startDate, endDate
+  const period = req.query.date || req.query.year
+  if (req.query.date) {
+    periodObj = await db.queryMonths({
+      value: period,
+    })
+  } else if (req.query.year) {
+    periodObj = await db.queryYears({
+      value: period,
+    })
+  }
 
-  const endDate = new Date(
-    new Date(startDate).setMonth(startDate.getMonth() + 1)
-  )
-  console.log(startDate)
-  console.log(endDate)
+  if (!periodObj[0].from || !periodObj[0].to) {
+    startDate = new Date(period)
+    startDate.setHours(0)
+    endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
+  } else {
+    startDate = periodObj[0].from
+    endDate = periodObj[0].to
+  }
+
   const dateClause = {
     $gte: startDate,
     $lt: endDate,
   }
   console.log(dateClause)
+
   try {
     const expenses = await db.queryExpense({
       date: dateClause,
@@ -82,12 +95,29 @@ const getExpenses = async (req, res, next, db) => {
   }
 }
 
-const getMonthBalance = async (req, res, next, db) => {
-  const startDate = new Date(req.query.startDate)
-  const endDate = new Date(startDate)
-  startDate.setDate(1)
-  endDate.setMonth(startDate.getMonth() + 1)
-  endDate.setDate(0)
+const getPeriodBalance = async (req, res, next, db) => {
+  let periodObj, startDate, endDate
+  const period = req.query.date || req.query.year
+  if (req.query.date) {
+    periodObj = await db.queryMonths({
+      value: period,
+    })
+  } else if (req.query.year) {
+    periodObj = await db.queryYears({
+      value: period,
+    })
+  }
+
+  if (!periodObj[0].from || !periodObj[0].to) {
+    startDate = new Date(period)
+    startDate.setDate(1)
+    endDate = new Date(
+      new Date(startDate).setMonth(startDate.getMonth() + 1)
+    ).setDate(0)
+  } else {
+    startDate = periodObj[0].from
+    endDate = periodObj[0].to
+  }
   const query = {
     date: { $gte: startDate },
     source: 'hdfc account',
@@ -345,6 +375,59 @@ const updateMonths = async (req, res, next, db) => {
   }
 }
 
+const getYears = async (req, res, next, db) => {
+  try {
+    const result = await db.queryYears(
+      req.query,
+      req.query.start,
+      req.query.limit
+    )
+    const count = await db.getTotalYears({})
+    res.send({
+      data: result,
+      count,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const addYear = async (req, res, next, db) => {
+  try {
+    const result = await db.addYear(req.body)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const updateYears = async (req, res, next, db) => {
+  try {
+    const list = req.body
+    const promises = []
+    list.forEach((l) => {
+      promises.push(db.updateYears({ _id: l._id }, l))
+    })
+    const result = await Promise.all(promises)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
 const getExpenseCategories = async (req, res, next, db) => {
   try {
     const result = await db.queryExpenseCategories(req.query)
@@ -568,7 +651,7 @@ module.exports = {
   graphByMonths,
   updateExpense,
   getFixedExpenses,
-  getMonthBalance,
+  getPeriodBalance,
   searchExpenses,
   getMonthList: getMonths,
   addToMonthList: addMonth,
@@ -586,4 +669,7 @@ module.exports = {
   addExpenseCategory,
   updateExpenseCategory,
   getMutualFunds,
+  getYearList: getYears,
+  addToYearList: addYear,
+  updateYearList: updateYears,
 }
