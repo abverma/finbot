@@ -20,54 +20,37 @@ const totalClause = {
 }
 
 const getExpenses = async (req, res, next, db) => {
-  let periodObj, startDate, endDate
-  const period = req.query.date || req.query.year
-  if (req.query.date) {
-    periodObj = await db.queryMonths({
-      value: period,
+  const { month, year, timezone } = req.query
+  const filter = {
+    $and: [
+      {
+        $expr: { $eq: [{ $year: '$date' }, parseInt(year)] },
+      },
+      {
+        details: {
+          $nin: appMetadata.ignoredExpenses,
+        },
+      },
+    ],
+  }
+  if (month) {
+    filter.$and.push({
+      $expr: {
+        $eq: [{ $month: { date: '$date', timezone } }, parseInt(month)],
+      },
     })
-  } else if (req.query.year) {
-    periodObj = await db.queryYears({
-      value: period,
-    })
   }
-
-  if (!periodObj[0].from || !periodObj[0].to) {
-    startDate = new Date(period)
-    startDate.setHours(0)
-    endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
-  } else {
-    startDate = periodObj[0].from
-    endDate = periodObj[0].to
-  }
-
-  const dateClause = {
-    $gte: startDate,
-    $lt: endDate,
-  }
-  console.log(dateClause)
 
   try {
-    const expenses = await db.queryExpense({
-      date: dateClause,
-      details: {
-        $nin: appMetadata.ignoredExpenses,
+    const expenses = await db.queryExpense(filter)
+    filter.$and.push({
+      expense_source: {
+        $ne: 'ora sal',
       },
-      // expense_source: {
-      //   $ne: 'ora sal',
-      // },
     })
     const pipelines = [
       {
-        $match: {
-          expense_source: {
-            $ne: 'ora sal',
-          },
-          date: dateClause,
-          details: {
-            $nin: appMetadata.ignoredExpenses,
-          },
-        },
+        $match: filter,
       },
       {
         $group: {
@@ -646,6 +629,32 @@ const getMutualFunds = async (req, res, next, db) => {
   }
 }
 
+const executeCustomQuery = async (req, res, next, db) => {
+  const { limit } = req.query
+  const filter = req.body
+  const { Expense } = db.models
+  const projection = {
+    date: 1,
+    details: 1,
+    debit_amount: 1,
+    credit_amount: 1,
+    account: 1,
+    _id: -1,
+  }
+  try {
+    const result = await Promise.all([
+      Expense.find(filter, projection).limit(limit),
+      Expense.count(filter),
+    ])
+    res.send({
+      data: result[0],
+      total: result[1],
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 module.exports = {
   getExpenses,
   graphByMonths,
@@ -672,4 +681,5 @@ module.exports = {
   getYearList: getYears,
   addToYearList: addYear,
   updateYearList: updateYears,
+  executeCustomQuery,
 }

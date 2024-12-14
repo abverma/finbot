@@ -24,6 +24,58 @@ export default function HomePage() {
   const [resetFilter, setResetFilter] = useState(false)
   const [year, setYear] = useState()
   const [yearList, setYearList] = useState([])
+  const [month, setMonth] = useState()
+  const newMonthList = [
+    {
+      label: 'January',
+      value: 1,
+    },
+    {
+      label: 'February',
+      value: 2,
+    },
+    {
+      label: 'March',
+      value: 3,
+    },
+    {
+      label: 'April',
+      value: 4,
+    },
+    {
+      label: 'May',
+      value: 5,
+    },
+    {
+      label: 'June',
+      value: 6,
+    },
+    {
+      label: 'July',
+      value: 7,
+    },
+    {
+      label: 'August',
+      value: 8,
+    },
+    {
+      label: 'September',
+      value: 9,
+    },
+    {
+      label: 'October',
+      value: 10,
+    },
+    {
+      label: 'November',
+      value: 11,
+    },
+    {
+      label: 'December',
+      value: 12,
+    },
+  ]
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   useEffect(() => {
     fetchMonthList()
@@ -64,11 +116,12 @@ export default function HomePage() {
   }
 
   function fetchExpenses() {
-    let url = `/expenses`
-    if (date) {
-      url += `?date=${date}`
-    } else if (year) {
-      url += `?year=${year}`
+    let url = `/expenses?timezone=${timezone}`
+    if (month) {
+      url += `&month=${month}`
+    }
+    if (year) {
+      url += `&year=${year}`
     }
     fetch(url)
       .then((data) => {
@@ -401,21 +454,19 @@ export default function HomePage() {
 
   async function handleSelectMonth(e) {
     if (e.target.value) {
-      setDate(e.target.value)
-      setYear('')
+      setMonth(e.target.value)
     }
   }
 
   async function handleSelectYear(e) {
     if (e.target.value) {
-      setDate('')
       setYear(e.target.value)
     }
   }
 
   function handleSearch(criterias) {
     searchExpenses(criterias)
-    setDate('')
+    setMonth('')
   }
 
   function handleClearSearch() {
@@ -448,8 +499,8 @@ export default function HomePage() {
               <option defaultValue value="">
                 Select Month
               </option>
-              {monthList.map((x, idx) => (
-                <option key={x._id} value={x.value}>
+              {newMonthList.map((x, idx) => (
+                <option key={idx} value={x.value}>
                   {x.label}
                 </option>
               ))}

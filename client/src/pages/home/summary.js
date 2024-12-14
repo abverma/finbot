@@ -8,23 +8,31 @@ export default function Summary(props) {
   Chart.register(CategoryScale)
   Chart.register(Colors)
 
-  const dataSet = props.aggregate?.filter((x) => x._id !== 'investment')
+  const dataSet = props.aggregate?.filter(
+    (x) => x._id !== 'investment' && x.total > 0
+  )
   const titleDateString = props.dateString
     ? ' - ' +
       new Date(props.dateString).toLocaleString('en-US', { month: 'long' }) +
       ' ' +
       new Date(props.dateString).getFullYear()
     : props.year
-  const chartData = {
-    labels: dataSet.map((x) => x._id),
-    datasets: [
-      {
-        label: 'Expenses',
-        data: dataSet.map((x) => x.total),
-        hoverOffset: 4,
-      },
-    ],
-  }
+
+  const chartData =
+    dataSet && dataSet.length
+      ? {
+          labels: dataSet.map((x) =>
+            x._id.replace(x._id.charAt(0), x._id.charAt(0).toUpperCase())
+          ),
+          datasets: [
+            {
+              label: 'Expenses',
+              data: dataSet.map((x) => x.total),
+              hoverOffset: 4,
+            },
+          ],
+        }
+      : null
 
   const options = {
     plugins: {
@@ -68,7 +76,7 @@ export default function Summary(props) {
       </div>
       <div className="card-body">
         <div className="container p-3 m-auto">
-          {props.aggregate.length ? (
+          {props.aggregate?.length ? (
             <div id="summaryChart">
               <Doughnut data={chartData} options={options}></Doughnut>
             </div>
@@ -76,7 +84,7 @@ export default function Summary(props) {
             ''
           )}
         </div>
-        {props.aggregate.length
+        {props.aggregate?.length
           ? props.aggregate
               .filter((x) => x._id !== 'investment')
               .map((rec, idx) => {
@@ -214,7 +222,7 @@ export default function Summary(props) {
           </dl>
         ) : null}
 
-        {props.aggregate.length &&
+        {props.aggregate?.length &&
         props.aggregate.find((x) => x._id === 'investment') ? (
           <dl className="row mt-4 mb-0">
             <dt className="col-7">

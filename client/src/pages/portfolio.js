@@ -27,16 +27,23 @@ export default function PortfolioPage() {
     <div className="container p-2">
       <div className="card border-0 shadow my-2 p-2">
         <div className="card-body">
-          <h4 className="card-title">
-            Mutual Funds{' '}
-            {show
-              ? ` - ${totalCurrent.toLocaleString('en-IN', {
-                  style: 'currency',
-                  currency: 'INR',
-                })}`
-              : ''}
-            {show ? <span className={totalColor}>{` (${ret} %)`}</span> : ''}
-          </h4>
+          <div className="row justify-content-between pb-2">
+            <h4 className="col-auto card-title">
+              Mutual Funds{' '}
+              {show
+                ? ` - ${totalCurrent.toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                  })}`
+                : ''}
+              {show ? <span className={totalColor}>{` (${ret} %)`}</span> : ''}
+            </h4>
+            <div className="col-2 d-flex flex-row-reverse justify-content-start">
+              <button className="btn btn-primary mx-1">Save</button>
+              <button className="btn btn-primary mx-1">Add</button>
+            </div>
+          </div>
+
           <table className="table table-hover card-body align-middle mb-0">
             <thead className="table-light">
               <tr>

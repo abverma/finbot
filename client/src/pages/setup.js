@@ -3,7 +3,7 @@ import React from 'react'
 import { useState, useEffect, useReducer, useRef } from 'react'
 
 export default function SetupPage() {
-  const [accountList, dispatch] = useReducer(accountListReducer, [])
+  const [accountList, dispatch] = useReducer(listReducer, [])
   const [toastMessage, setToastMessage] = useState('')
   const toast = document.getElementById('liveToast')
   const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast)
@@ -90,6 +90,20 @@ export default function SetupPage() {
             Configuration
           </button>
         </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className="nav-link"
+            id="custom-query-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#custom-query-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="custom-query-tab-pane"
+            aria-selected="false"
+          >
+            Custom Query
+          </button>
+        </li>
       </ul>
       <div className="tab-content" id="myTabContent">
         <div
@@ -139,6 +153,208 @@ export default function SetupPage() {
                 showToastMessage={showToastMessage}
               ></MiscConfigList>
             </div>
+          </div>
+        </div>
+        <div
+          className="tab-pane fade"
+          id="custom-query-tab-pane"
+          role="tabpanel"
+          aria-labelledby="custom-query-tab"
+          tabIndex="0"
+        >
+          <CustomQueryCompoent></CustomQueryCompoent>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CustomQueryCompoent() {
+  const [result, setResult] = useState([])
+  const [total, setTotal] = useState(0)
+  const [limit, setLimit] = useState(10)
+  const [filter, setFilter] = useState('')
+
+  function executeQuery() {
+    try {
+      const payload = filter ? JSON.parse(filter) : {}
+      fetch(`/customQuery?limit=${limit}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => {
+          return response.json()
+        })
+        .then((response) => {
+          setResult(response.data)
+          setTotal(response.total)
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  function onChange(value, key) {
+    switch (key) {
+      case 'limit':
+        setLimit(value)
+        break
+      case 'filter':
+        setFilter(value)
+        break
+    }
+  }
+
+  function selectAll(event) {
+    const checked = event.target.checked
+    setResult(
+      result.map((x) => {
+        return { ...x, selected: checked }
+      })
+    )
+  }
+
+  function checkRow(event, row) {
+    row.selected = event.target.checked
+  }
+
+  return (
+    <div className="card border-0 shadow my-2 p-2">
+      <div className="card-body">
+        <div className="card-header border-0 row justify-content-between white px-0 px-md-3">
+          <h5 className="col-auto card-title">Custom Query</h5>
+        </div>
+        <div className="row pb-2">
+          <div className="col form-floating p-1">
+            <textarea
+              id="filter"
+              className="form-control"
+              style={{ height: '100px' }}
+              value={filter}
+              onChange={(e) => onChange(e.target.value, 'filter')}
+            ></textarea>
+            <label htmlFor="filter">Filter</label>
+          </div>
+          <div className="col-auto form-floating p-1">
+            <input
+              id="limit"
+              type="text"
+              className="form-control"
+              value={limit}
+              onChange={(e) => onChange(e.target.value, 'limit')}
+            ></input>
+            <label htmlFor="limit">Limit</label>
+          </div>
+          <div class="col-auto">
+            <button className="btn btn-primary col-auto" onClick={executeQuery}>
+              Execute
+            </button>
+          </div>
+        </div>
+        {result.length ? (
+          <div>
+            <div className="row pb-2">
+              <div className="col form-floating p-1">
+                <textarea
+                  id="update"
+                  className="form-control"
+                  style={{ height: '100px' }}
+                  value={filter}
+                  onChange={(e) => onChange(e.target.value, 'filter')}
+                ></textarea>
+                <label htmlFor="update">Update</label>
+              </div>
+
+              <div class="col-auto">
+                <button
+                  className="btn btn-primary col-auto"
+                  onClick={executeQuery}
+                >
+                  Update
+                </button>
+              </div>
+              <div class="col-auto">
+                <button
+                  className="btn btn-primary col-auto"
+                  onClick={executeQuery}
+                >
+                  Update All
+                </button>
+              </div>
+            </div>
+            <div className="row pb-2">
+              <div className="col form-floating p-1">
+                <textarea
+                  id="selected"
+                  className="form-control"
+                  style={{ height: '100px' }}
+                  value={result.filter((x) => x.selected).map((x) => x._id)}
+                ></textarea>
+                <label htmlFor="update">Selected Ids</label>
+              </div>
+            </div>
+          </div>
+        ) : (
+          ''
+        )}
+
+        <table className="table table-hover card-body align-middle mt-2">
+          <thead className="table-light">
+            <tr>
+              <th scope="col" className="text-muted">
+                <input type="checkbox" onChange={(e) => selectAll(e)}></input>
+              </th>
+              <th scope="col" className="text-muted">
+                #
+              </th>
+              {result.length
+                ? Object.keys(result[0])
+                    .filter((x) => x !== 'selected')
+                    .map((column) => (
+                      <th scope="col" className="text-muted">
+                        {column}
+                      </th>
+                    ))
+                : ''}
+            </tr>
+          </thead>
+          <tbody className="list">
+            {result.map((row, idx) => (
+              <tr key={idx}>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={row.selected}
+                    onCheck={(e) => checkRow(e, row)}
+                  ></input>
+                </th>
+                <th scope="row" className="text-muted">
+                  {idx + 1}
+                </th>
+                {Object.keys(row).map((column, idx) => (
+                  <td key={idx}>{row[column]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="card-header row border-0 align-items-center justify-content-end white">
+          <small className="col-md-2 col-6 text-end">
+            Showing {result.length} of {total}
+          </small>
+          <div className="col-md-1 col-3 d-flex">
+            <button className="btn border me-1" type="button">
+              <i className="bi bi-chevron-left"></i>
+            </button>
+            <button className="btn border" type="button">
+              <i className="bi bi-chevron-right"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -378,7 +594,7 @@ function ImportComponent({ accountList, showToastMessage }) {
 }
 
 function MonthList({ showToastMessage }) {
-  const [monthList, dispatch] = useReducer(monthListReducer, [])
+  const [monthList, dispatch] = useReducer(listReducer, [])
   const changedIdList = useRef([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -542,17 +758,17 @@ function MonthList({ showToastMessage }) {
               </td>
               <td>
                 <input
-                  type="text"
+                  type="date"
                   className="form-control"
-                  value={item.from}
+                  value={item.from ? item.from.split('T')[0] : ''}
                   onChange={(e) => handleChange(e.target.value, idx, 'from')}
                 ></input>
               </td>
               <td>
                 <input
-                  type="text"
+                  type="date"
                   className="form-control"
-                  value={item.to}
+                  value={item.to ? item.to.split('T')[0] : ''}
                   onChange={(e) => handleChange(e.target.value, idx, 'to')}
                 ></input>
               </td>
@@ -752,18 +968,22 @@ function YearList({ showToastMessage }) {
               </td>
               <td>
                 <input
-                  type="text"
+                  type="date"
                   className="form-control"
-                  value={item.from}
-                  onChange={(e) => handleChange(e.target.value, idx, 'from')}
+                  value={item.from ? item.from.split('T')[0] : ''}
+                  onChange={(e) =>
+                    handleChange(e.target.valueAsDate, idx, 'from')
+                  }
                 ></input>
               </td>
               <td>
                 <input
-                  type="text"
+                  type="date"
                   className="form-control"
-                  value={item.to}
-                  onChange={(e) => handleChange(e.target.value, idx, 'to')}
+                  value={item.to ? item.to.split('T')[0] : ''}
+                  onChange={(e) =>
+                    handleChange(e.target.valueAsDate, idx, 'to')
+                  }
                 ></input>
               </td>
               <td>
@@ -1405,24 +1625,24 @@ function ExpenseCategoryList({ showToastMessage }) {
   )
 }
 
-function accountListReducer(accountList, action) {
+function listReducer(list, action) {
   switch (action.type) {
     case 'set':
       return action.data
     case 'add':
       return [
-        ...accountList,
         { value: action.value, label: action.label, enabled: action.enabled },
+        ...list,
       ]
     case 'change':
-      return accountList.map((item, idx) => {
+      return list.map((item, idx) => {
         if (idx === action.idx) {
           item[action.field] = action.value
         }
         return item
       })
     default:
-      console.log('accountListReducer: Invalid reducer action.')
+      console.log('listReducer: Invalid reducer action.')
   }
 }
 

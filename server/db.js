@@ -81,8 +81,8 @@ const MutualFunds = mongoose.model('mutual_funds', {
 })
 
 const connect = async function () {
-  // await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
-  await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
+  await mongoose.connect(`mongodb://${DB_HOST}/${DB_NAME}`)
+  // await mongoose.connect(`mongodb://${DB_USER}:${DB_PWD}@${DB_HOST}/${DB_NAME}`) //if your database has auth enabled
 }
 
 const bulkCreateExpense = async (expenses) => {
@@ -121,7 +121,7 @@ const queryMonths = async (query, start = 0, limit = 25) => {
 }
 
 const getTotalMonths = async (query) => {
-  return Months.count(query)
+  return Months.countDocuments(query)
 }
 
 const addMonth = async (list) => {
@@ -133,11 +133,11 @@ const updateMonths = async (query, item) => {
 }
 
 const queryYears = async (query, start = 0, limit = 25) => {
-  return Years.find(query).skip(start).limit(limit).sort({ _id: -1 })
+  return Years.find(query).skip(start).limit(limit).sort({ value: -1 })
 }
 
 const getTotalYears = async (query) => {
-  return Years.count(query)
+  return Years.countDocuments(query)
 }
 
 const addYear = async (list) => {
@@ -251,4 +251,7 @@ module.exports = {
   addYear,
   updateYears,
   getTotalYears,
+  models: {
+    Expense,
+  },
 }
