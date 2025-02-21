@@ -127,7 +127,6 @@ export default function SetupPage() {
         >
           <div className="card border-0 shadow my-2 p-2">
             <div className="card-body">
-              <MonthList showToastMessage={showToastMessage}></MonthList>
               <YearList showToastMessage={showToastMessage}></YearList>
               <AccountList
                 accountList={accountList}
@@ -227,7 +226,7 @@ function CustomQueryCompoent() {
   return (
     <div className="card border-0 shadow my-2 p-2">
       <div className="card-body">
-        <div className="card-header border-0 row justify-content-between white px-0 px-md-3">
+        <div className="card-header border-0 row justify-content-between px-0 px-md-3">
           <h5 className="col-auto card-title">Custom Query</h5>
         </div>
         <div className="row pb-2">
@@ -305,7 +304,7 @@ function CustomQueryCompoent() {
         )}
 
         <table className="table table-hover card-body align-middle mt-2">
-          <thead className="table-light">
+          <thead className="table">
             <tr>
               <th scope="col" className="text-muted">
                 <input type="checkbox" onChange={(e) => selectAll(e)}></input>
@@ -344,7 +343,7 @@ function CustomQueryCompoent() {
             ))}
           </tbody>
         </table>
-        <div className="card-header row border-0 align-items-center justify-content-end white">
+        <div className="card-header row border-0 align-items-center justify-content-end">
           <small className="col-md-2 col-6 text-end">
             Showing {result.length} of {total}
           </small>
@@ -593,216 +592,6 @@ function ImportComponent({ accountList, showToastMessage }) {
   )
 }
 
-function MonthList({ showToastMessage }) {
-  const [monthList, dispatch] = useReducer(listReducer, [])
-  const changedIdList = useRef([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-
-  useEffect(() => {
-    fetchMonthList()
-  }, [page])
-
-  function fetchMonthList() {
-    fetch(`/monthList?start=${(page - 1) * 10}&limit=10`)
-      .then((data) => data.json())
-      .then((data) => {
-        setTotal(data.count)
-        dispatch({
-          type: 'set',
-          data: data.data,
-        })
-      })
-      .catch((e) => {
-        console.log(e)
-      })
-  }
-
-  function addRow() {
-    dispatch({
-      type: 'add',
-      label: '',
-      value: '',
-      enabled: false,
-    })
-  }
-
-  function save() {
-    const changedRows = changedIdList.current.map((x) => {
-      return monthList.find((y) => y._id === x)
-    })
-    const newRows = monthList.filter((x) => {
-      return !x._id
-    })
-    saveChangedRows(changedRows)
-    saveNewRows(newRows)
-  }
-
-  function saveNewRows(rows) {
-    if (!rows.length) {
-      return
-    }
-    fetch('/monthList', {
-      method: 'POST',
-      body: JSON.stringify(rows),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(() => {
-        showToastMessage('Saved successfully.')
-      })
-      .catch((e) => {
-        console.log(e)
-        showToastMessage('Could not save.')
-      })
-  }
-
-  function saveChangedRows(rows) {
-    if (!rows.length) {
-      return
-    }
-    fetch('/monthList', {
-      method: 'PUT',
-      body: JSON.stringify(rows),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(() => {
-        showToastMessage('Saved successfully.')
-      })
-      .catch((e) => {
-        console.log(e)
-        showToastMessage('Could not save.')
-      })
-  }
-
-  function handleChange(value, idx, field) {
-    if (
-      monthList[idx]['_id'] &&
-      !changedIdList.current.find((x) => x === monthList[idx]['_id'])
-    ) {
-      changedIdList.current.push(monthList[idx]['_id'])
-    }
-    dispatch({
-      type: 'change',
-      idx,
-      field,
-      value,
-    })
-  }
-
-  function next() {
-    setPage(page + 1)
-  }
-
-  return (
-    <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white px-0 px-md-3">
-        <h5 className="col-auto card-title">Months</h5>
-        <div className="col-2 d-flex flex-row-reverse justify-content-start">
-          <button className="btn btn-primary mx-1" onClick={save}>
-            Save
-          </button>
-          <button className="btn btn-primary mx-1" onClick={addRow}>
-            Add
-          </button>
-        </div>
-      </div>
-
-      <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
-          <tr>
-            <th scope="col" className="text-muted">
-              #
-            </th>
-            <th scope="col" className="text-muted">
-              Label
-            </th>
-            <th scope="col" className="text-muted">
-              Value
-            </th>
-            <th scope="col" className="text-muted">
-              From
-            </th>
-            <th scope="col" className="text-muted">
-              To
-            </th>
-            <th scope="col" className="text-muted">
-              Enabled
-            </th>
-          </tr>
-        </thead>
-        <tbody className="list">
-          {monthList.map((item, idx) => (
-            <tr key={idx}>
-              <th scope="row" className="text-muted">
-                {idx + 1}
-              </th>
-              <td>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={item.label}
-                  onChange={(e) => handleChange(e.target.value, idx, 'label')}
-                ></input>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={item.value}
-                  onChange={(e) => handleChange(e.target.value, idx, 'value')}
-                ></input>
-              </td>
-              <td>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={item.from ? item.from.split('T')[0] : ''}
-                  onChange={(e) => handleChange(e.target.value, idx, 'from')}
-                ></input>
-              </td>
-              <td>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={item.to ? item.to.split('T')[0] : ''}
-                  onChange={(e) => handleChange(e.target.value, idx, 'to')}
-                ></input>
-              </td>
-              <td>
-                <input
-                  className="form-check-input mt-0"
-                  type="checkbox"
-                  checked={item.enabled}
-                  onChange={(e) =>
-                    handleChange(e.target.checked, idx, 'enabled')
-                  }
-                ></input>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="card-header row border-0 align-items-center justify-content-end white">
-        <small className="col-md-2 col-6 text-end">
-          Showing {monthList.length} of {total}
-        </small>
-        <div className="col-md-1 col-3 d-flex">
-          <button className="btn border me-1" type="button">
-            <i className="bi bi-chevron-left"></i>
-          </button>
-          <button className="btn border" type="button" onClick={(e) => next()}>
-            <i className="bi bi-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function YearList({ showToastMessage }) {
   const [yearList, dispatch] = useReducer(yearListReducer, [])
   const changedIdList = useRef([])
@@ -909,7 +698,7 @@ function YearList({ showToastMessage }) {
 
   return (
     <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white px-0 px-md-3">
+      <div className="card-header border-0 row justify-content-between px-0 px-md-3">
         <h5 className="col-auto card-title">Years</h5>
         <div className="col-2 d-flex flex-row-reverse justify-content-start">
           <button className="btn btn-primary mx-1" onClick={save}>
@@ -922,7 +711,7 @@ function YearList({ showToastMessage }) {
       </div>
 
       <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
+        <thead className="table">
           <tr>
             <th scope="col" className="text-muted">
               #
@@ -1000,7 +789,7 @@ function YearList({ showToastMessage }) {
           ))}
         </tbody>
       </table>
-      <div className="card-header row border-0 align-items-center justify-content-end white">
+      <div className="card-header row border-0 align-items-center justify-content-end">
         <small className="col-md-2 col-6 text-end">
           Showing {yearList.length} of {total}
         </small>
@@ -1091,7 +880,7 @@ function AccountList({ accountList, dispatch }) {
 
   return (
     <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white">
+      <div className="card-header border-0 row justify-content-between">
         <h5 className="col-auto card-title">Accounts</h5>
         <div className="col-2 d-flex flex-row-reverse justify-content-start">
           <button className="btn btn-primary mx-1" onClick={save}>
@@ -1104,7 +893,7 @@ function AccountList({ accountList, dispatch }) {
       </div>
 
       <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
+        <thead className="table">
           <tr>
             <th scope="col" className="text-muted">
               #
@@ -1259,7 +1048,7 @@ function ConfigList({ showToastMessage }) {
 
   return (
     <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white">
+      <div className="card-header border-0 row justify-content-between">
         <h5 className="col-auto card-title">Expense Category Catchwords</h5>
         <div className="col-2 d-flex flex-row-reverse justify-content-start">
           <button className="btn btn-primary mx-1" onClick={save}>
@@ -1272,7 +1061,7 @@ function ConfigList({ showToastMessage }) {
       </div>
 
       <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
+        <thead className="table">
           <tr>
             <th scope="col" className="text-muted">
               #
@@ -1418,7 +1207,7 @@ function MiscConfigList({ showToastMessage }) {
 
   return (
     <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white">
+      <div className="card-header border-0 row justify-content-between">
         <h5 className="col-auto card-title">
           Miscellaneous Expenses Catchwords
         </h5>
@@ -1433,7 +1222,7 @@ function MiscConfigList({ showToastMessage }) {
       </div>
 
       <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
+        <thead className="table">
           <tr>
             <th scope="col" className="text-muted">
               #
@@ -1578,7 +1367,7 @@ function ExpenseCategoryList({ showToastMessage }) {
 
   return (
     <div className="card-body">
-      <div className="card-header border-0 row justify-content-between white">
+      <div className="card-header border-0 row justify-content-between">
         <h5 className="col-auto card-title">Expense Categories</h5>
         <div className="col-2 d-flex flex-row-reverse justify-content-start">
           <button className="btn btn-primary mx-1" onClick={save}>
@@ -1591,7 +1380,7 @@ function ExpenseCategoryList({ showToastMessage }) {
       </div>
 
       <table className="table table-hover card-body align-middle mb-0">
-        <thead className="table-light">
+        <thead className="table">
           <tr>
             <th scope="col" className="text-muted">
               #
@@ -1643,27 +1432,6 @@ function listReducer(list, action) {
       })
     default:
       console.log('listReducer: Invalid reducer action.')
-  }
-}
-
-function monthListReducer(monthList, action) {
-  switch (action.type) {
-    case 'set':
-      return action.data
-    case 'add':
-      return [
-        { value: action.value, label: action.label, enabled: action.enabled },
-        ...monthList,
-      ]
-    case 'change':
-      return monthList.map((item, idx) => {
-        if (idx === action.idx) {
-          item[action.field] = action.value
-        }
-        return item
-      })
-    default:
-      console.log('monthListReducer: Invalid reducer action.')
   }
 }
 

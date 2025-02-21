@@ -77,7 +77,7 @@ export default function SearchBar({ handleSearch, handleClearSearch }) {
 
   return (
     <div className="card border-0 shadow">
-      <div className="card-header row white">
+      <div className="card-header row">
         <h3 className="card-title col">Search</h3>
         <div className="col-2 text-end">
           <i

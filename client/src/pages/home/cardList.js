@@ -1,12 +1,13 @@
 import React from 'react'
 import { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 import { setCurrentExpense } from '../../../lib/slice'
+import { formatCurrency } from '../../../lib/uiHelper'
 
 export default function CardList(props) {
-  const count = useSelector((state) => state.counter.value)
   const dispatch = useDispatch()
+
   function checkRow(index) {}
 
   return (
@@ -75,7 +76,6 @@ function Card({
     document
       .getElementById('splitModal')
       .addEventListener('hide.bs.modal', (event) => {
-        debugger
         dispatch(setCurrentExpense({}))
       })
   }
@@ -104,25 +104,24 @@ function Card({
                   type="button"
                   data-bs-title="Save"
                   onClick={() => setIsEdit(!isEdit)}
+                  title="Save"
                 ></i>
               ) : (
-                <small>
-                  <i
-                    className="bi bi-pencil"
-                    type="button"
-                    data-bs-title="Edit"
-                    onClick={() => setIsEdit(!isEdit)}
-                  ></i>
-                </small>
-              )}
-              <small>
                 <i
-                  className="bi bi-vr ms-2"
+                  className="bi bi-pencil"
                   type="button"
-                  data-bs-title="Split"
-                  onClick={() => toggleModal(row)}
+                  data-bs-title="Edit"
+                  onClick={() => setIsEdit(!isEdit)}
+                  title="Edit"
                 ></i>
-              </small>
+              )}
+              <i
+                className="bi bi-vr ms-2"
+                type="button"
+                data-bs-title="Split"
+                onClick={() => toggleModal(row)}
+                title="Split"
+              ></i>
             </div>
           ) : (
             <div className="col-1 text-end">{row.items?.length}</div>
@@ -189,13 +188,11 @@ function Card({
           </div>
           <div className="col-6 col-md-2 align-items-start text-end">
             <h6 className="card-title">
-              {(view === 'list'
-                ? row.credit_amount * -1 || row.debit_amount
-                : row.amount
-              ).toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
+              {formatCurrency(
+                view === 'list'
+                  ? row.credit_amount * -1 || row.debit_amount
+                  : row.amount
+              )}
             </h6>
           </div>
         </div>
@@ -216,9 +213,9 @@ function Card({
               ></i>
             </div>
             <div id={'expenseGroupList' + index} className="card-body collapse">
-              {row.items?.map((item) => {
+              {row.items?.map((item, idx) => {
                 return (
-                  <div className="row">
+                  <div className="row" key={idx}>
                     <div className="col form-control-sm">
                       {new Date(item.date).toDateString()}
                     </div>
@@ -232,12 +229,9 @@ function Card({
                       {item.details.substring(0, 20)}
                     </div>
                     <div className="col text-end">
-                      {(
+                      {formatCurrency(
                         item.credit_amount * -1 || item.debit_amount
-                      ).toLocaleString('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                      })}
+                      )}
                     </div>
                   </div>
                 )

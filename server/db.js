@@ -77,7 +77,14 @@ const MutualFunds = mongoose.model('mutual_funds', {
   invested_value: Number,
   current_value: Number,
   type: String,
-  creation_date: Date,
+  creation_date: {
+    type: Date,
+    default: Date.now,
+  },
+  update_date: {
+    type: Date,
+    default: Date.now,
+  },
 })
 
 const connect = async function () {
@@ -203,6 +210,10 @@ const updateExpenseCategory = async (query, item) => {
 const queryMutualFunds = async (query) => {
   return MutualFunds.find(query).sort({ date: -1 })
 }
+
+const updateMutualFunds = async (query, update) => {
+  return MutualFunds.updateOne(query, update)
+}
 // connect()
 // .then(() => {
 //     return deleteAllExpenses()
@@ -254,4 +265,5 @@ module.exports = {
   models: {
     Expense,
   },
+  updateMutualFunds,
 }

@@ -3,6 +3,6 @@ import reducer from './slice'
 
 export default configureStore({
   reducer: {
-    counter: reducer,
+    app: reducer,
   },
 })

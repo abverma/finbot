@@ -1,8 +1,8 @@
 import React from 'react'
-import { useState } from 'react'
 import { Doughnut } from 'react-chartjs-2'
 import { CategoryScale, Colors } from 'chart.js'
 import Chart from 'chart.js/auto'
+import { formatCurrency } from '../../../lib/uiHelper'
 
 export default function Summary(props) {
   Chart.register(CategoryScale)
@@ -11,12 +11,16 @@ export default function Summary(props) {
   const dataSet = props.aggregate?.filter(
     (x) => x._id !== 'investment' && x.total > 0
   )
-  const titleDateString = props.dateString
-    ? ' - ' +
-      new Date(props.dateString).toLocaleString('en-US', { month: 'long' }) +
-      ' ' +
-      new Date(props.dateString).getFullYear()
-    : props.year
+
+  let titleDateString = props.month || props.year ? ' - ' : ''
+
+  if (props.month) {
+    titleDateString += props.month + ' '
+  }
+
+  if (props.year) {
+    titleDateString += props.year
+  }
 
   const chartData =
     dataSet && dataSet.length
@@ -39,19 +43,26 @@ export default function Summary(props) {
       legend: {
         display: false,
       },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            return formatCurrency(context.raw)
+          },
+        },
+      },
     },
   }
 
   let iconMap = {
-    investment: 'bi-activity',
+    investment: 'bi-graph-up-arrow',
     'car-emi': 'bi-car-front',
-    car: 'bi-car-front',
+    car: 'bi-car-front-fill',
     entertainment: 'bi-play-btn',
     groceries: 'bi-basket',
     phone: 'bi-phone',
     electricity: 'bi-plug',
     travel: 'bi-airplane',
-    medical: 'bi-prescription',
+    medical: 'bi-capsule',
     'eating-out': 'bi-cup-hot',
     misc: 'bi-question-lg',
     amazon: 'bi-cart',
@@ -69,7 +80,7 @@ export default function Summary(props) {
 
   return (
     <div className="row card border-0 shadow">
-      <div className="card-header border-0 white text-center">
+      <div className="card-header border-0 text-center">
         <h6 className="card-header-title h6 p-2 text-muted ">
           SUMMARY {titleDateString}
         </h6>
@@ -103,12 +114,7 @@ export default function Summary(props) {
                         rec._id.charAt(0).toUpperCase()
                       )}
                     </dt>
-                    <dd className="col-5">
-                      {rec.total.toLocaleString('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                      })}
-                    </dd>
+                    <dd className="col-5">{formatCurrency(rec.total)}</dd>
                   </dl>
                 )
               })
@@ -119,12 +125,7 @@ export default function Summary(props) {
             <dt className="col-7">
               <i className="bi bi-calculator px-2"></i>Total Expense
             </dt>
-            <dd className="col-5">
-              {props.total.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.total)}</dd>
           </dl>
         ) : null}
 
@@ -138,12 +139,7 @@ export default function Summary(props) {
               <i className="bi bi-cash-stack px-2 text-primary"></i>Fixed
               Expense
             </dt>
-            <dd className="col-5">
-              {props.totalFixed.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.totalFixed)}</dd>
           </dl>
         ) : null}
 
@@ -159,12 +155,7 @@ export default function Summary(props) {
               <i className="bi bi-cash-stack px-2 text-success"></i>
               Necessary Expense
             </dt>
-            <dd className="col-5">
-              {props.totalNecessary.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.totalNecessary)}</dd>
           </dl>
         ) : null}
 
@@ -180,12 +171,7 @@ export default function Summary(props) {
               <i className="bi bi-cash-stack px-2 text-danger"></i>Avoidable
               Expense
             </dt>
-            <dd className="col-5">
-              {props.totalAvoidable.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.totalAvoidable)}</dd>
           </dl>
         ) : null}
 
@@ -199,12 +185,7 @@ export default function Summary(props) {
               <i className="bi bi-cash-stack px-2 text-secondary"></i>One-off
               Expense
             </dt>
-            <dd className="col-5">
-              {props.totalDoesntHurt.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.totalDoesntHurt)}</dd>
           </dl>
         ) : null}
 
@@ -213,12 +194,7 @@ export default function Summary(props) {
             <dt className="col-7">
               <i className="bi bi-box-arrow-in-down px-2"></i>Credit
             </dt>
-            <dd className="col-5">
-              {props.credit.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.credit)}</dd>
           </dl>
         ) : null}
 
@@ -229,12 +205,9 @@ export default function Summary(props) {
               <i className="bi bi-activity px-2"></i>Investment
             </dt>
             <dd className="col-5">
-              {props.aggregate
-                .find((x) => x._id === 'investment')
-                .total.toLocaleString('en-IN', {
-                  style: 'currency',
-                  currency: 'INR',
-                })}
+              {formatCurrency(
+                props.aggregate.find((x) => x._id === 'investment').total
+              )}
             </dd>
           </dl>
         ) : null}
@@ -244,12 +217,7 @@ export default function Summary(props) {
             <dt className="col-7">
               <i className="bi bi-cash-stack px-2"></i>Salary
             </dt>
-            <dd className="col-5">
-              {props.salary.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.salary)}</dd>
           </dl>
         ) : null}
 
@@ -258,12 +226,7 @@ export default function Summary(props) {
             <dt className="col-7">
               <i className="bi bi-wallet2 px-2"></i>Opening Balance
             </dt>
-            <dd className="col-5">
-              {props.openingBalance.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.openingBalance)}</dd>
           </dl>
         ) : null}
 
@@ -272,12 +235,7 @@ export default function Summary(props) {
             <dt className="col-7">
               <i className="bi bi-wallet px-2"></i>Closing Balance
             </dt>
-            <dd className="col-5">
-              {props.closingBalance.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </dd>
+            <dd className="col-5">{formatCurrency(props.closingBalance)}</dd>
           </dl>
         ) : null}
       </div>

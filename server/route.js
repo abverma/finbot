@@ -79,37 +79,26 @@ const getExpenses = async (req, res, next, db) => {
 }
 
 const getPeriodBalance = async (req, res, next, db) => {
-  let periodObj, startDate, endDate
-  const period = req.query.date || req.query.year
-  if (req.query.date) {
-    periodObj = await db.queryMonths({
-      value: period,
-    })
-  } else if (req.query.year) {
-    periodObj = await db.queryYears({
-      value: period,
+  const { month, year, timezone } = req.query
+  const query = {
+    $and: [
+      { source: 'hdfc account' },
+      {
+        $expr: { $eq: [{ $year: '$date' }, parseInt(year)] },
+      },
+    ],
+  }
+  if (month) {
+    query.$and.push({
+      $expr: {
+        $eq: [{ $month: { date: '$date', timezone } }, parseInt(month)],
+      },
     })
   }
 
-  if (!periodObj[0].from || !periodObj[0].to) {
-    startDate = new Date(period)
-    startDate.setDate(1)
-    endDate = new Date(
-      new Date(startDate).setMonth(startDate.getMonth() + 1)
-    ).setDate(0)
-  } else {
-    startDate = periodObj[0].from
-    endDate = periodObj[0].to
-  }
-  const query = {
-    date: { $gte: startDate },
-    source: 'hdfc account',
-  }
   try {
     const firstexpense = await db.queryExpense(query, 1)
-    query.date = {
-      $lte: endDate,
-    }
+
     const lastexpense = await db.queryExpense(query, 1, { _id: -1 })
 
     res.send({
@@ -130,21 +119,26 @@ const getPeriodBalance = async (req, res, next, db) => {
 
 const graphByMonths = async (req, res, next, db) => {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const { year } = req.query
   const pipelines = [
     {
       $match: {
-        expense_source: {
-          $ne: 'ora sal',
-        },
-        category: {
-          $ne: 'investment',
-        },
-        details: {
-          $nin: appMetadata.ignoredExpenses,
-        },
-        date: {
-          $gt: new Date('2022-09-01'),
-        },
+        $and: [
+          {
+            $expr: { $eq: [{ $year: '$date' }, parseInt(year)] },
+          },
+          {
+            expense_source: {
+              $ne: 'ora sal',
+            },
+            category: {
+              $ne: 'investment',
+            },
+            details: {
+              $nin: appMetadata.ignoredExpenses,
+            },
+          },
+        ],
       },
     },
     {
@@ -308,7 +302,7 @@ const searchExpenses = async (req, res, next, db) => {
 const getMonths = async (req, res, next, db) => {
   try {
     const result = await db.queryMonths(
-      req.query,
+      req.query.query ?? {},
       req.query.start,
       req.query.limit
     )
@@ -361,7 +355,7 @@ const updateMonths = async (req, res, next, db) => {
 const getYears = async (req, res, next, db) => {
   try {
     const result = await db.queryYears(
-      req.query,
+      req.query.query ?? {},
       req.query.start,
       req.query.limit
     )
@@ -508,7 +502,7 @@ const updateExpenseCategory = async (req, res, next, db) => {
 const getCategoryCatchwords = async (req, res, next, db) => {
   try {
     const result = await db.queryCategoryCatchwords(
-      req.query,
+      req.query.query ?? {},
       req.query.start,
       req.query.limit
     )
@@ -561,7 +555,7 @@ const updateCategoryCatchwords = async (req, res, next, db) => {
 const getMiscellaneousCatchwords = async (req, res, next, db) => {
   try {
     const result = await db.queryMiscellaneousCatchwords(
-      req.query,
+      req.query.query ?? {},
       req.query.start,
       req.query.limit
     )
@@ -652,6 +646,26 @@ const executeCustomQuery = async (req, res, next, db) => {
     })
   } catch (e) {
     console.log(e)
+    res.status(500).send({
+      error: e.message,
+    })
+  }
+}
+
+const updateMutualFunds = async (req, res, next, db) => {
+  const _id = req.query._id
+  const update = req.body
+  try {
+    await db.updateMutualFunds({ _id }, update)
+    const result = await db.queryMutualFunds()
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    console.log(e)
+    res.status(500).send({
+      error: e.message,
+    })
   }
 }
 
@@ -682,4 +696,5 @@ module.exports = {
   addToYearList: addYear,
   updateYearList: updateYears,
   executeCustomQuery,
+  updateMutualFunds,
 }

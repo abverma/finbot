@@ -91,7 +91,7 @@ function TRow(props) {
 export default function Table(props) {
   return (
     <table className="table card-body align-middle mb-0">
-      <thead className="table-light">
+      <thead className="table">
         <tr>
           <th scope="col" className="text-muted">
             #

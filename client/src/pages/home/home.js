@@ -2,7 +2,10 @@ import React from 'react'
 import SearchBar from './search'
 import Summary from './summary'
 import ExpenseList from './expenseList'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext } from 'react'
+import { Provider } from 'react-redux'
+import store from '../../../lib/store'
+import { AppContext } from '../../../lib/appContext'
 
 export default function HomePage() {
   const [monthList, setMonthList] = useState([])
@@ -22,9 +25,9 @@ export default function HomePage() {
   const [openingBalance, setOpeningBalance] = useState(0)
   const [closingBalance, setClosingBalance] = useState(0)
   const [resetFilter, setResetFilter] = useState(false)
-  const [year, setYear] = useState()
+  const [year, setYear] = useState(new Date().getFullYear())
   const [yearList, setYearList] = useState([])
-  const [month, setMonth] = useState()
+  const [month, setMonth] = useState(new Date().getMonth())
   const newMonthList = [
     {
       label: 'January',
@@ -78,30 +81,20 @@ export default function HomePage() {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   useEffect(() => {
-    fetchMonthList()
     fetchYearList()
-
-    if (date || year) {
-      fetchExpenses()
-      fetchPeriodBalances()
-    }
     const tooltipTriggerList = document.querySelectorAll(
       '[data-bs-toggle="tooltip"]'
     )
     const tooltipList = [...tooltipTriggerList].map(
       (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
     )
-  }, [date, year])
+    start()
+  }, [])
 
-  function fetchMonthList() {
-    fetch('/monthList?enabled=true')
-      .then((data) => data.json())
-      .then((data) => {
-        setMonthList(data.data)
-      })
-      .catch((e) => {
-        console.log(e)
-      })
+  function start() {
+    setFilter({})
+    fetchExpenses()
+    fetchPeriodBalances()
   }
 
   function fetchYearList() {
@@ -281,11 +274,12 @@ export default function HomePage() {
     setGroupedExpenses(groupExpenses(rows))
   }
   function fetchPeriodBalances() {
-    let url = '/getPeriodBalance'
-    if (date) {
-      url += `?date=${date}`
-    } else if (year) {
-      url += `?year=${year}`
+    let url = `/getPeriodBalance?timezone=${timezone}`
+    if (month) {
+      url += `&month=${month}`
+    }
+    if (year) {
+      url += `&year=${year}`
     }
     fetch(url)
       .then((data) => {
@@ -453,9 +447,7 @@ export default function HomePage() {
   }
 
   async function handleSelectMonth(e) {
-    if (e.target.value) {
-      setMonth(e.target.value)
-    }
+    setMonth(e.target.value ?? parseInt(e.target.value))
   }
 
   async function handleSelectYear(e) {
@@ -485,95 +477,123 @@ export default function HomePage() {
   }
 
   return (
-    <div>
-      <div className="container p-3 m-auto">
-        <div className="row justify-content-start align-items-center">
-          <div className="ps-0 col-10 col-md-4">
-            <select
-              id="selectMonth"
-              className="form-select form-select-md m-2"
-              aria-label="Default select example"
-              onChange={(e) => handleSelectMonth(e)}
-              value={date}
-            >
-              <option defaultValue value="">
-                Select Month
-              </option>
-              {newMonthList.map((x, idx) => (
-                <option key={idx} value={x.value}>
-                  {x.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="ps-0 col-10 col-md-2">
-            <select
-              id="selectYear"
-              className="form-select form-select-md m-2"
-              aria-label="Default select example"
-              onChange={(e) => handleSelectYear(e)}
-              value={year}
-            >
-              <option defaultValue value="">
-                Select Year
-              </option>
-              {yearList.map((x) => (
-                <option key={x._id} value={x.value}>
-                  {x.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="col-auto">
-            <i
-              className="bi bi-arrow-clockwise"
-              type="button"
-              data-bs-title="Refresh"
-              onClick={() => refreshPage()}
-            ></i>
+    <AppContext.Provider
+      value={{
+        amountMask: '********',
+      }}
+    >
+      <Provider store={store}>
+        <div>
+          <div className="container p-3 m-auto">
+            <form className="row justify-content-start align-items-center">
+              <div className="ps-0 col-10 col-md-auto">
+                <select
+                  id="selectMonth"
+                  className="form-select form-select-md m-2"
+                  aria-label="Default select example"
+                  onChange={(e) => handleSelectMonth(e)}
+                  value={month}
+                >
+                  <option defaultValue value="">
+                    Select Month
+                  </option>
+                  {newMonthList.map((x, idx) => (
+                    <option key={idx} value={x.value}>
+                      {x.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="ps-0 col-10 col-md-auto">
+                <select
+                  id="selectYear"
+                  className="form-select form-select-md m-2"
+                  aria-label="Default select example"
+                  onChange={(e) => handleSelectYear(e)}
+                  value={year}
+                >
+                  <option defaultValue value="">
+                    Select Year
+                  </option>
+                  {yearList.map((x) => (
+                    <option key={x._id} value={x.value}>
+                      {x.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-auto">
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  disabled={!Boolean(year)}
+                  onClick={(e) => {
+                    start()
+                  }}
+                >
+                  Go
+                </button>
+              </div>
+              <div className="col-auto">
+                <i
+                  className="bi bi-arrow-clockwise"
+                  type="button"
+                  data-bs-title="Refresh"
+                  onClick={() => refreshPage()}
+                ></i>
+              </div>
+            </form>
+            <div className="row pb-2">
+              <SearchBar
+                handleSearch={(c) => handleSearch(c)}
+                handleClearSearch={() => handleClearSearch()}
+              ></SearchBar>
+            </div>
+            <div className="row gx-5 gy-2">
+              <div className="col-12 col-md-4">
+                <Summary
+                  aggregate={aggregates}
+                  month={
+                    month
+                      ? newMonthList.find((x) => x.value == month).label
+                      : ''
+                  }
+                  year={year ?? ''}
+                  total={total}
+                  totalFixed={totalFixed}
+                  totalNecessary={totalNecessary}
+                  totalAvoidable={totalAvoidable}
+                  totalDoesntHurt={totalDoesntHurt}
+                  credit={credit}
+                  salary={salary}
+                  openingBalance={openingBalance}
+                  closingBalance={closingBalance}
+                  clearAndApplyFilter={clearAndApplyFilter}
+                ></Summary>
+              </div>
+              <div className="col-12 col-md-8">
+                <ExpenseList
+                  expenses={filteredExpenses}
+                  month={
+                    month
+                      ? newMonthList.find((x) => x.value == month).label
+                      : ''
+                  }
+                  year={year ?? ''}
+                  handleLocalSearch={(value, filter) =>
+                    handleLocalSearch(value, filter)
+                  }
+                  updateRow={(row) => updateRow(row)}
+                  saveRow={(row) => saveRow(row)}
+                  filter={filter}
+                  keywordSearch={(keyword) => keywordSearch(keyword)}
+                  groupedExpenses={groupedExpenses}
+                ></ExpenseList>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="row pb-2">
-          <SearchBar
-            handleSearch={(c) => handleSearch(c)}
-            handleClearSearch={() => handleClearSearch()}
-          ></SearchBar>
-        </div>
-        <div className="row gx-5 gy-2">
-          <div className="col-12 col-md-4">
-            <Summary
-              aggregate={aggregates}
-              dateString={date}
-              year={year}
-              total={total}
-              totalFixed={totalFixed}
-              totalNecessary={totalNecessary}
-              totalAvoidable={totalAvoidable}
-              totalDoesntHurt={totalDoesntHurt}
-              credit={credit}
-              salary={salary}
-              openingBalance={openingBalance}
-              closingBalance={closingBalance}
-              clearAndApplyFilter={clearAndApplyFilter}
-            ></Summary>
-          </div>
-          <div className="col-12 col-md-8">
-            <ExpenseList
-              expenses={filteredExpenses}
-              dateString={date}
-              year={year}
-              handleLocalSearch={(value, filter) =>
-                handleLocalSearch(value, filter)
-              }
-              updateRow={(row) => updateRow(row)}
-              saveRow={(row) => saveRow(row)}
-              filter={filter}
-              keywordSearch={(keyword) => keywordSearch(keyword)}
-              groupedExpenses={groupedExpenses}
-            ></ExpenseList>
-          </div>
-        </div>
-      </div>
-    </div>
+      </Provider>
+    </AppContext.Provider>
   )
 }

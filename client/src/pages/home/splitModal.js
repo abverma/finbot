@@ -3,9 +3,16 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 export default function SplitModal({ expenseCategories }) {
-  const currentExpense = useSelector((state) => state.counter.currentExpense)
-  const [newExpenses, setNewExpenses] = useState([])
+  const currentExpense = useSelector((state) => state.app.currentExpense)
+  const [newExpenses, setNewExpenses] = useState([
+    {
+      debit_amount: '',
+      parent_id: currentExpense._id,
+      category: currentExpense.category,
+    },
+  ])
   const [isLoading, setIsLoading] = useState(false)
+  const [hasChange, setHasChange] = useState(false)
 
   function addRow() {
     const newExpense = structuredClone(currentExpense)
@@ -60,6 +67,7 @@ export default function SplitModal({ expenseCategories }) {
   }
 
   function onRowChange(idx, value, key) {
+    setHasChange(true)
     const currentRow = structuredClone(newExpenses[idx])
     currentRow[key] = key === 'debit_amount' ? parseFloat(value) : value
     console.log(currentRow[key])
@@ -124,7 +132,7 @@ export default function SplitModal({ expenseCategories }) {
             ) : (
               newExpenses.map((expense, idx) => {
                 return (
-                  <div className="row">
+                  <div className="row" key={idx}>
                     <div className="col-auto">
                       <select
                         id="selectCategory"
@@ -167,16 +175,9 @@ export default function SplitModal({ expenseCategories }) {
           <div className="modal-footer">
             <button
               type="button"
-              className="btn btn-secondary"
-              data-bs-dismiss="modal"
-              onClick={() => close()}
-            >
-              Close
-            </button>
-            <button
-              type="button"
               className="btn btn-primary"
               onClick={() => save()}
+              disabled={!hasChange}
             >
               Save changes
             </button>

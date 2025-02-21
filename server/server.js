@@ -43,6 +43,7 @@ const {
   addToYearList,
   updateYearList,
   executeCustomQuery,
+  updateMutualFunds,
 } = require('./route')
 const { convert } = require('./readFile')
 const exp = require('constants')
@@ -164,6 +165,10 @@ app.put('/convertPdf', upload.any(), async (req, res) => {
   }
 })
 app.get('/mutualfunds', (req, res, next) => getMutualFunds(req, res, next, db))
+app.put('/mutualfunds', (req, res, next) =>
+  updateMutualFunds(req, res, next, db)
+)
+
 app.post('/customQuery', (req, res, next) =>
   executeCustomQuery(req, res, next, db)
 )

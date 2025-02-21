@@ -1,15 +1,18 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
-export default class AnalyticsPage extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-  async componentDidMount() {
-    const ctx = document.getElementById('analyticsChart')
-    const data = await this.fetchData()
-    new Chart(ctx, {
-      type: 'line',
-      data: {
+export default function AnalyticsPage() {
+  const [year, setYear] = useState('2025')
+  let chart = useRef({})
+
+  useEffect(() => {
+    fetchData()
+  }, [year])
+
+  async function fetchData() {
+    try {
+      const data = await (await fetch(`/graphByMonths?year=${year}`)).json()
+      const ctx = document.getElementById('analyticsChart')
+      const chartData = {
         labels: data.map((x) => x._id.month + '/' + x._id.year),
         datasets: [
           {
@@ -25,27 +28,47 @@ export default class AnalyticsPage extends React.Component {
             borderColor: 'blue',
           },
         ],
-      },
-    })
-  }
-  async fetchData() {
-    try {
-      const resp = await (await fetch('/graphByMonths')).json()
-      return resp
+      }
+      if (chart.current.id !== undefined) {
+        chart.current.data = chartData
+        chart.current.update()
+      } else {
+        chart.current = new Chart(ctx, {
+          type: 'line',
+          data: chartData,
+        })
+      }
     } catch (e) {
       console.log(e)
     }
   }
-  render() {
-    return (
-      <div className="container p-3 m-auto">
-        <div>
-          <canvas
-            id="analyticsChart"
-            style={{ position: 'relative', height: '40vh', width: '60vw' }}
-          ></canvas>
-        </div>
-      </div>
-    )
+
+  function handleSelect(e) {
+    setYear(e.target.value)
   }
+
+  return (
+    <div className="container p-3 m-auto">
+      <form className="row">
+        <div className="col-md-3 mx-auto">
+          <select
+            class="form-select"
+            onChange={(e) => handleSelect(e)}
+            value={year}
+          >
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+          </select>
+        </div>
+      </form>
+      <div>
+        <canvas
+          id="analyticsChart"
+          style={{ position: 'relative', height: '40vh', width: '60vw' }}
+        ></canvas>
+      </div>
+    </div>
+  )
 }
