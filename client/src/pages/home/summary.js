@@ -87,7 +87,7 @@ export default function Summary(props) {
       </div>
       <div className="card-body">
         <div className="container p-3 m-auto">
-          {props.aggregate?.length ? (
+          {chartData?.length ? (
             <div id="summaryChart">
               <Doughnut data={chartData} options={options}></Doughnut>
             </div>
@@ -201,7 +201,13 @@ export default function Summary(props) {
         {props.aggregate?.length &&
         props.aggregate.find((x) => x._id === 'investment') ? (
           <dl className="row mt-4 mb-0">
-            <dt className="col-7">
+            <dt
+              className="col-7"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) =>
+                props.clearAndApplyFilter('investment', 'category')
+              }
+            >
               <i className="bi bi-activity px-2"></i>Investment
             </dt>
             <dd className="col-5">

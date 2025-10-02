@@ -27,7 +27,7 @@ export default function HomePage() {
   const [resetFilter, setResetFilter] = useState(false)
   const [year, setYear] = useState(new Date().getFullYear())
   const [yearList, setYearList] = useState([])
-  const [month, setMonth] = useState(new Date().getMonth())
+  const [month, setMonth] = useState(new Date().getMonth() + 1)
   const newMonthList = [
     {
       label: 'January',

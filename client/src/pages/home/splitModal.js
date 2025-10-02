@@ -4,13 +4,7 @@ import { useSelector } from 'react-redux'
 
 export default function SplitModal({ expenseCategories }) {
   const currentExpense = useSelector((state) => state.app.currentExpense)
-  const [newExpenses, setNewExpenses] = useState([
-    {
-      debit_amount: '',
-      parent_id: currentExpense._id,
-      category: currentExpense.category,
-    },
-  ])
+  const [newExpenses, setNewExpenses] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasChange, setHasChange] = useState(false)
 

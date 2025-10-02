@@ -44,6 +44,9 @@ const {
   updateYearList,
   executeCustomQuery,
   updateMutualFunds,
+  getIgnoredExpenses,
+  updateIgnoredExpenses,
+  graphCategoriesByMonths,
 } = require('./route')
 const { convert } = require('./readFile')
 const exp = require('constants')
@@ -168,15 +171,24 @@ app.get('/mutualfunds', (req, res, next) => getMutualFunds(req, res, next, db))
 app.put('/mutualfunds', (req, res, next) =>
   updateMutualFunds(req, res, next, db)
 )
-
 app.post('/customQuery', (req, res, next) =>
   executeCustomQuery(req, res, next, db)
 )
+app.get('/ignoredExpenses', (req, res, next) =>
+  getIgnoredExpenses(req, res, next, db)
+)
+app.put('/ignoredExpenses', (req, res, next) =>
+  updateIgnoredExpenses(req, res, next, db)
+)
+app.get('/graphCategoriesByMonths', (req, res, next) =>
+  graphCategoriesByMonths(req, res, next, db)
+)
+
 app.listen(3001, async () => {
   try {
     await db.connect()
     console.log('connected to database ...')
-    const ignoredExpenses = await db.queryIgnoredExpenses()
+    const ignoredExpenses = await db.queryIgnoredExpenses({ enabled: true })
     if (ignoredExpenses) {
       const appMetadata = AppMetadata.instance
       appMetadata.ignoredExpenses = ignoredExpenses

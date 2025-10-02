@@ -182,6 +182,67 @@ const graphByMonths = async (req, res, next, db) => {
   }
 }
 
+const graphCategoriesByMonths = async (req, res, next, db) => {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const { year } = req.query
+  const pipelines = [
+    {
+      $match: {
+        $and: [
+          {
+            $expr: { $eq: [{ $year: '$date' }, parseInt(year)] },
+          },
+          {
+            expense_source: {
+              $ne: 'ora sal',
+            },
+            details: {
+              $nin: appMetadata.ignoredExpenses,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        month: {
+          $month: {
+            date: '$date',
+            timezone,
+          },
+        },
+        year: {
+          $year: {
+            date: '$date',
+            timezone,
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { month: '$month', year: '$year', category: '$category' },
+        total_expense: totalClause,
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        '_id.year': 1,
+        '_id.month': 1,
+      },
+    },
+  ]
+  try {
+    res.send(await db.aggregate(pipelines))
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
 const updateExpense = async (req, res, next, db) => {
   const id = req.query['_id']
   const row = req.body
@@ -625,21 +686,26 @@ const getMutualFunds = async (req, res, next, db) => {
 
 const executeCustomQuery = async (req, res, next, db) => {
   const { limit } = req.query
-  const filter = req.body
+  const { filter, update } = req.body
   const { Expense } = db.models
   const projection = {
     date: 1,
     details: 1,
     debit_amount: 1,
     credit_amount: 1,
-    account: 1,
-    _id: -1,
+    source: 1,
+    exclude: 1,
   }
   try {
-    const result = await Promise.all([
-      Expense.find(filter, projection).limit(limit),
-      Expense.count(filter),
+    let result
+    if (update) {
+      await Expense.updateMany(filter, update)
+    }
+    result = await Promise.all([
+      Expense.find(filter, projection).limit(limit ? parseInt(limit) : 0),
+      Expense.countDocuments(filter),
     ])
+
     res.send({
       data: result[0],
       total: result[1],
@@ -666,6 +732,40 @@ const updateMutualFunds = async (req, res, next, db) => {
     res.status(500).send({
       error: e.message,
     })
+  }
+}
+
+const getIgnoredExpenses = async (req, res, next, db) => {
+  try {
+    const result = await db.queryIgnoredExpenses(
+      {},
+      req.query.start,
+      req.query.limit
+    )
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
+  }
+}
+
+const updateIgnoredExpenses = async (req, res, next, db) => {
+  try {
+    const _id = req.query._id
+    const update = req.body
+    const result = await db.updateIgnoredExpenses({ _id }, update)
+    res.send({
+      data: result,
+    })
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    })
+    console.log(e)
   }
 }
 
@@ -697,4 +797,7 @@ module.exports = {
   updateYearList: updateYears,
   executeCustomQuery,
   updateMutualFunds,
+  getIgnoredExpenses,
+  updateIgnoredExpenses,
+  graphCategoriesByMonths,
 }

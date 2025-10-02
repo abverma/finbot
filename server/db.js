@@ -23,7 +23,10 @@ const expenseSchema = new mongoose.Schema({
   status: String,
   year: Number,
   month: Number,
-  exclude: Boolean,
+  exclude: {
+    type: Boolean,
+    default: false,
+  },
 })
 const DB_HOST = process.env.DB_HOST
 const DB_NAME = process.env.DB_NAME
@@ -69,6 +72,7 @@ const MiscellaneousCatchwords = mongoose.model('miscellaneous_catchwords', {
 
 const IgnoredExpenses = mongoose.model('ignored_expenses', {
   desc: String,
+  enabled: Boolean,
 })
 
 const MutualFunds = mongoose.model('mutual_funds', {
@@ -195,8 +199,12 @@ const updateMiscellaneousCatchwords = async (query, item) => {
   return MiscellaneousCatchwords.updateOne(query, item)
 }
 
-const queryIgnoredExpenses = async (query) => {
-  return IgnoredExpenses.find(query)
+const queryIgnoredExpenses = async (query, start, limit) => {
+  return IgnoredExpenses.find(query).skip(start).limit(limit).sort({ _id: -1 })
+}
+
+const updateIgnoredExpenses = async (query, update) => {
+  return IgnoredExpenses.updateOne(query, update)
 }
 
 const addExpenseCategory = async (list) => {
@@ -212,6 +220,7 @@ const queryMutualFunds = async (query) => {
 }
 
 const updateMutualFunds = async (query, update) => {
+  update.update_date = new Date()
   return MutualFunds.updateOne(query, update)
 }
 // connect()
@@ -266,4 +275,5 @@ module.exports = {
     Expense,
   },
   updateMutualFunds,
+  updateIgnoredExpenses,
 }

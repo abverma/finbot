@@ -151,6 +151,9 @@ export default function SetupPage() {
               <MiscConfigList
                 showToastMessage={showToastMessage}
               ></MiscConfigList>
+              <IgnoredExpensesList
+                showToastMessage={showToastMessage}
+              ></IgnoredExpensesList>
             </div>
           </div>
         </div>
@@ -171,32 +174,52 @@ export default function SetupPage() {
 function CustomQueryCompoent() {
   const [result, setResult] = useState([])
   const [total, setTotal] = useState(0)
-  const [limit, setLimit] = useState(10)
-  const [filter, setFilter] = useState('')
+  const [limit, setLimit] = useState(0)
+  const [filter, setFilter] = useState(sessionStorage.getItem('lastQuery'))
+  const [update, setUpdate] = useState('')
 
   function executeQuery() {
-    try {
-      const payload = filter ? JSON.parse(filter) : {}
-      fetch(`/customQuery?limit=${limit}`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((response) => {
-          return response.json()
-        })
-        .then((response) => {
-          setResult(response.data)
-          setTotal(response.total)
-        })
-        .catch((e) => {
-          console.log(e)
-        })
-    } catch (e) {
-      console.log(e)
+    if (!filter) {
+      return
     }
+    sessionStorage.setItem('lastQuery', filter)
+    const payload = {
+      filter: JSON.parse(filter),
+    }
+    execute(payload)
+  }
+
+  function executeUpdateQuery() {
+    const selectedIds = result.filter((x) => x.selected).map((x) => x._id)
+    const payload = {
+      filter: {
+        _id: { $in: selectedIds },
+      },
+      update: JSON.parse(update),
+    }
+    debugger
+    execute(payload)
+  }
+
+  function execute(payload) {
+    const url = limit ? `/customQuery?limit=${limit}` : `/customQuery`
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then((response) => {
+        setResult(response.data)
+        setTotal(response.total)
+      })
+      .catch((e) => {
+        console.log(e)
+      })
   }
 
   function onChange(value, key) {
@@ -206,6 +229,9 @@ function CustomQueryCompoent() {
         break
       case 'filter':
         setFilter(value)
+        break
+      case 'update':
+        setUpdate(value)
         break
     }
   }
@@ -219,8 +245,12 @@ function CustomQueryCompoent() {
     )
   }
 
-  function checkRow(event, row) {
-    row.selected = event.target.checked
+  function checkRow(event, idx) {
+    setResult(
+      result.map((row, rowId) => {
+        return rowId === idx ? { ...row, selected: event.target.checked } : row
+      })
+    )
   }
 
   return (
@@ -243,14 +273,14 @@ function CustomQueryCompoent() {
           <div className="col-auto form-floating p-1">
             <input
               id="limit"
-              type="text"
+              type="number"
               className="form-control"
               value={limit}
               onChange={(e) => onChange(e.target.value, 'limit')}
             ></input>
             <label htmlFor="limit">Limit</label>
           </div>
-          <div class="col-auto">
+          <div className="col-auto">
             <button className="btn btn-primary col-auto" onClick={executeQuery}>
               Execute
             </button>
@@ -264,26 +294,18 @@ function CustomQueryCompoent() {
                   id="update"
                   className="form-control"
                   style={{ height: '100px' }}
-                  value={filter}
-                  onChange={(e) => onChange(e.target.value, 'filter')}
+                  value={update}
+                  onChange={(e) => onChange(e.target.value, 'update')}
                 ></textarea>
                 <label htmlFor="update">Update</label>
               </div>
 
-              <div class="col-auto">
+              <div className="col-auto">
                 <button
                   className="btn btn-primary col-auto"
-                  onClick={executeQuery}
+                  onClick={executeUpdateQuery}
                 >
                   Update
-                </button>
-              </div>
-              <div class="col-auto">
-                <button
-                  className="btn btn-primary col-auto"
-                  onClick={executeQuery}
-                >
-                  Update All
                 </button>
               </div>
             </div>
@@ -330,15 +352,17 @@ function CustomQueryCompoent() {
                   <input
                     type="checkbox"
                     checked={row.selected}
-                    onCheck={(e) => checkRow(e, row)}
+                    onChange={(e) => checkRow(e, idx)}
                   ></input>
                 </th>
                 <th scope="row" className="text-muted">
                   {idx + 1}
                 </th>
-                {Object.keys(row).map((column, idx) => (
-                  <td key={idx}>{row[column]}</td>
-                ))}
+                {Object.keys(row)
+                  .filter((x) => x !== 'selected')
+                  .map((column, idx) => (
+                    <td key={idx}>{row[column] + ''}</td>
+                  ))}
               </tr>
             ))}
           </tbody>
@@ -1414,6 +1438,169 @@ function ExpenseCategoryList({ showToastMessage }) {
   )
 }
 
+function IgnoredExpensesList({ showToastMessage }) {
+  const [expenseList, dispatch] = useReducer(expenseReducer, [])
+  const changedIdList = useRef([])
+
+  useEffect(() => {
+    fetchConfigList()
+  }, [])
+
+  function fetchConfigList() {
+    fetch(`/ignoredExpenses?start=0&limit=10`)
+      .then((data) => data.json())
+      .then((data) => {
+        // setTotal(data.count)
+        dispatch({
+          type: 'set',
+          data: data.data,
+        })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+  }
+
+  function addRow() {
+    dispatch({
+      type: 'add',
+      expense_source: '',
+      catchwords: [],
+    })
+  }
+
+  function save() {
+    const changedRows = changedIdList.current.map((x) => {
+      return expenseList.find((y) => y._id === x)
+    })
+    const newRows = expenseList.filter((x) => {
+      return !x._id
+    })
+    saveChangedRows(changedRows)
+    saveNewRows(newRows)
+  }
+
+  function saveNewRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    fetch('/ignoredExpenses', {
+      method: 'POST',
+      body: JSON.stringify(rows),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function saveChangedRows(rows) {
+    if (!rows.length) {
+      return
+    }
+    const promises = []
+    rows.forEach((row) => {
+      promises.push(
+        fetch(`/ignoredExpenses?_id=${row._id}`, {
+          method: 'PUT',
+          body: JSON.stringify(row),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      )
+    })
+    Promise.all(promises)
+      .then(() => {
+        showToastMessage('Saved successfully.')
+      })
+      .catch((e) => {
+        console.log(e)
+        showToastMessage('Could not save.')
+      })
+  }
+
+  function handleChange(value, idx, field) {
+    if (
+      expenseList[idx]['_id'] &&
+      !changedIdList.current.find((x) => x === expenseList[idx]['_id'])
+    ) {
+      changedIdList.current.push(expenseList[idx]['_id'])
+    }
+    dispatch({
+      type: 'change',
+      idx,
+      field,
+      value,
+    })
+  }
+
+  return (
+    <div className="card-body">
+      <div className="card-header border-0 row justify-content-between">
+        <h5 className="col-auto card-title">Ignored Expenses</h5>
+        <div className="col-2 d-flex flex-row-reverse justify-content-start">
+          <button className="btn btn-primary mx-1" onClick={save}>
+            Save
+          </button>
+          <button className="btn btn-primary mx-1" onClick={addRow}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="table table-hover card-body align-middle mb-0">
+        <thead className="table">
+          <tr>
+            <th scope="col" className="text-muted">
+              #
+            </th>
+            <th scope="col" className="text-muted">
+              Description
+            </th>
+            <th scope="col" className="text-muted">
+              Enabled
+            </th>
+          </tr>
+        </thead>
+        <tbody className="list">
+          {expenseList.map((item, idx) => (
+            <tr key={idx}>
+              <th scope="row" className="text-muted">
+                {idx + 1}
+              </th>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={item.desc}
+                  onChange={(e) => handleChange(e.target.value, idx, 'desc')}
+                ></input>
+              </td>
+              <td>
+                <input
+                  className="form-check-input mt-0"
+                  type="checkbox"
+                  checked={item.enabled}
+                  onChange={(e) =>
+                    handleChange(e.target.checked, idx, 'enabled')
+                  }
+                ></input>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function listReducer(list, action) {
   switch (action.type) {
     case 'set':
@@ -1521,5 +1708,23 @@ function expenseCategoryListReducer(list, action) {
       })
     default:
       console.log('expenseCategoryListReducer: Invalid reducer action.')
+  }
+}
+
+function expenseReducer(list, action) {
+  switch (action.type) {
+    case 'set':
+      return action.data
+    case 'add':
+      return [{ desc: action.desc, enabled: action.enabled }, ...list]
+    case 'change':
+      return list.map((item, idx) => {
+        if (idx === action.idx) {
+          item[action.field] = action.value
+        }
+        return item
+      })
+    default:
+      console.log('expenseReducer: Invalid reducer action.')
   }
 }

@@ -44,10 +44,15 @@ function Card({
   const [isEdit, setIsEdit] = useState(false)
 
   function onChange(e, rowKey) {
-    if (rowKey === 'checked') {
-      checkRow(index)
-    } else if (e.target) {
-      row[rowKey] = e.target.value
+    switch (rowKey) {
+      case 'checked':
+        checkRow(index)
+        break
+      case 'exclude':
+        row[rowKey] = e.target.checked
+        break
+      default:
+        row[rowKey] = e.target.value
     }
     updateRow(row)
     if (rowKey === 'category' || rowKey === 'exclude') {
@@ -130,12 +135,14 @@ function Card({
       </div>
       <div className="card-body">
         <div className="row justify-content-between">
-          <div className="col-6 col-md-3">
-            {isEdit ? (
+          <div className="col-6 col-md-9 d-flex align-items-start justify-content-between">
+            <div>
+              <label className="ps-0 form-control-sm">Category</label>
               <select
                 className="form-select form-select-sm mb-1"
                 value={row.category}
                 onChange={(e) => onChange(e, 'category')}
+                disabled={!isEdit}
               >
                 {expenseCategories.map((x) => (
                   <option value={x.category} key={x._id}>
@@ -146,41 +153,31 @@ function Card({
                   </option>
                 ))}
               </select>
-            ) : (
-              <div className="form-control-plaintext form-control-sm fw-bolder mb-1">
-                {row.category.replace(
-                  row.category.charAt(0),
-                  row.category.charAt(0).toUpperCase()
-                )}
-              </div>
-            )}
-            {isEdit ? (
+            </div>
+            <div>
+              <label className="ps-0 form-control-sm">Source</label>
               <input
                 type="text"
                 value={row.expense_source}
                 className="form-control form-control-sm mb-1"
                 onChange={(e) => onChange(e, 'expense_source')}
                 onKeyUp={(e) => onKeyUp(e, 'expense_source')}
+                disabled={!isEdit}
               ></input>
-            ) : (
-              <div className="form-control-plaintext form-control-sm mb-1">
-                {row.expense_source}
-              </div>
-            )}
-            <div>
+            </div>
+            <div className="d-flex">
               <input
                 className="form-check-input"
                 type="checkbox"
                 checked={row.exclude}
                 onChange={(e) => onChange(e, 'exclude')}
                 id="flexCheckDefault"
-                hidden={!isEdit && !row.exclude}
                 disabled={!isEdit}
               ></input>
               <label
                 className="form-check-label small ps-1"
                 htmlFor="flexCheckDefault"
-                hidden={!isEdit && !row.exclude}
+                disabled={!isEdit}
               >
                 Exclude from total
               </label>
@@ -196,11 +193,6 @@ function Card({
             </h6>
           </div>
         </div>
-        {/* <div className="row pt-2">
-          <small className="text-body-secondary">
-            {row.source}/&nbsp;{row.details.substring(0, 20)}
-          </small>
-        </div> */}
         {view === 'group' && row.items?.length ? (
           <div className="row form-control-sm justify-content-end">
             <span className="col-auto text-end pe-0">Details</span>

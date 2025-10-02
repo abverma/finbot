@@ -4,7 +4,7 @@ export const appSlice = createSlice({
   name: 'app',
   initialState: {
     currentExpense: {},
-    demoMode: true,
+    demoMode: false,
   },
   reducers: {
     setCurrentExpense: (state, action) => {
