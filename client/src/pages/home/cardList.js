@@ -89,7 +89,7 @@ function Card({
     <div className="card m-1">
       <div className="card-header">
         <div className="row align-items-start">
-          <div className="col-1">
+          <div className="col-3 col-md-1">
             <input
               className="form-check-input"
               type="checkbox"
@@ -98,11 +98,11 @@ function Card({
             ></input>
             <span>&nbsp;#{index + 1}</span>
           </div>
-          <div className="col text-center">
+          <div className="col-6 col-md-10 text-center">
             {new Date(row.date).toDateString()}
           </div>
           {view === 'list' ? (
-            <div className="col-1 text-end">
+            <div className="col-3 col-md-1 text-end">
               {isEdit ? (
                 <i
                   className="bi bi-check2"
@@ -129,14 +129,14 @@ function Card({
               ></i>
             </div>
           ) : (
-            <div className="col-1 text-end">{row.items?.length}</div>
+            <div className="col-3 col-md-1 text-end">{row.items?.length}</div>
           )}
         </div>
       </div>
       <div className="card-body">
         <div className="row justify-content-between">
-          <div className="col-6 col-md-9 d-flex align-items-start justify-content-between">
-            <div>
+          <div className="col-6 col-md-9 d-flex align-items-start justify-content-between row">
+            <div className="col-12 col-md-auto">
               <label className="ps-0 form-control-sm">Category</label>
               <select
                 className="form-select form-select-sm mb-1"
@@ -154,7 +154,7 @@ function Card({
                 ))}
               </select>
             </div>
-            <div>
+            <div className="col-12 col-md-auto">
               <label className="ps-0 form-control-sm">Source</label>
               <input
                 type="text"
@@ -165,7 +165,7 @@ function Card({
                 disabled={!isEdit}
               ></input>
             </div>
-            <div className="d-flex">
+            <div className="mt-2 d-flex">
               <input
                 className="form-check-input"
                 type="checkbox"

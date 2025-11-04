@@ -47,7 +47,7 @@ function App() {
       switchPage()
     })
     switchPage()
-  })
+  }, [currentPage, demoMode])
 
   function switchPage() {
     const main = ReactDOM.createRoot(document.getElementById('main'))
@@ -126,24 +126,24 @@ function App() {
               </a>
             </li>
           </ul>
-        </div>
-        <div className="d-flex">
-          <button
-            type="button"
-            className={demoMode ? 'btn active' : 'btn'}
-            onClick={(e) => toggleDemoMode()}
-            title="Demo Mode"
-          >
-            <i className="bi bi-incognito"></i>
-          </button>
-          <button
-            type="button"
-            className={darkModeEnabled ? 'btn active' : 'btn'}
-            onClick={(e) => toggleDarkMode()}
-            title="Dark Mode"
-          >
-            <i className="bi bi-moon-stars-fill"></i>
-          </button>
+          <div className="d-flex">
+            <button
+              type="button"
+              className={demoMode ? 'btn active' : 'btn'}
+              onClick={(e) => toggleDemoMode()}
+              title="Demo Mode"
+            >
+              <i className="bi bi-incognito"></i>
+            </button>
+            <button
+              type="button"
+              className={darkModeEnabled ? 'btn active' : 'btn'}
+              onClick={(e) => toggleDarkMode()}
+              title="Dark Mode"
+            >
+              <i className="bi bi-moon-stars-fill"></i>
+            </button>
+          </div>
         </div>
       </nav>
       <div id="main"></div>

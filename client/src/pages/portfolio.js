@@ -135,7 +135,7 @@ export default function PortfolioPage() {
       <div className="card border-0 shadow my-2 p-2">
         <div className="card-body">
           <div className="row justify-content-between pb-2">
-            <h4 className="col-auto card-title">
+            <h4 className="col-12 col-md-auto card-title">
               Mutual Funds {show ? ` - ${formatCurrency(totalCurrent)}` : ''}
               {show ? (
                 <span
@@ -145,7 +145,7 @@ export default function PortfolioPage() {
                 ''
               )}
             </h4>
-            <div className="col-2 d-flex flex-row-reverse justify-content-start">
+            <div className="col-12 col-md-2 d-flex flex-row-reverse justify-content-start">
               <button
                 className="btn btn-primary mx-1"
                 onClick={(e) => save()}
@@ -158,136 +158,137 @@ export default function PortfolioPage() {
               </button>
             </div>
           </div>
-
-          <table
-            className={
-              loading
-                ? 'table card-body align-middle mb-0 opacity-50'
-                : 'table table-hover card-body align-middle mb-0'
-            }
-          >
-            <thead>
-              <tr>
-                <th scope="col" className="text-muted">
-                  Name
-                </th>
-                <th scope="col" className="text-muted">
-                  Type
-                </th>
-                <th scope="col" className="text-muted">
-                  Start Date
-                </th>
-                <th scope="col" className="text-muted">
-                  Last Updated
-                </th>
-                <th scope="col" className="text-muted">
-                  Invested Value
-                </th>
-                <th scope="col" className="text-muted">
-                  Current Value
-                </th>
-                <th scope="col" className="text-muted">
-                  Returns
-                </th>
-                <th scope="col" className="text-muted">
-                  Risk
-                </th>
-                <th scope="col" className="text-muted">
-                  Comments
-                </th>
-              </tr>
-            </thead>
-            <tbody className="list">
-              {mutualFunds &&
-                mutualFunds.map((data, idx) => {
-                  return (
-                    <tr key={data._id}>
-                      <td>{data.name}</td>
-                      <td>{data.type}</td>
-                      <td>{new Date(data.date).toDateString()}</td>
-                      <td>{new Date(data.update_date).toDateString()}</td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled={
-                            data.type.toLowerCase() === 'lumpsum' || loading
+          <div className="table-responsive">
+            <table
+              className={
+                loading
+                  ? 'table card-body align-middle mb-0 opacity-50'
+                  : 'table table-hover card-body align-middle mb-0'
+              }
+            >
+              <thead>
+                <tr>
+                  <th scope="col" className="text-muted">
+                    Name
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Type
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Start Date
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Last Updated
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Invested Value
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Current Value
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Returns
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Risk
+                  </th>
+                  <th scope="col" className="text-muted">
+                    Comments
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="list">
+                {mutualFunds &&
+                  mutualFunds.map((data, idx) => {
+                    return (
+                      <tr key={data._id}>
+                        <td>{data.name}</td>
+                        <td>{data.type}</td>
+                        <td>{new Date(data.date).toDateString()}</td>
+                        <td>{new Date(data.update_date).toDateString()}</td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            disabled={
+                              data.type.toLowerCase() === 'lumpsum' || loading
+                            }
+                            value={
+                              data.showDisplayValue
+                                ? data.invested_value_display
+                                : data.invested_value
+                            }
+                            onChange={(e) => {
+                              onChange(e.target.value, idx, 'invested_value')
+                              onChange(
+                                e.target.value,
+                                idx,
+                                'invested_value_display'
+                              )
+                            }}
+                            onFocus={(e) => {
+                              onChange(false, idx, 'showDisplayValue')
+                            }}
+                            onBlur={(e) => {
+                              onChange(true, idx, 'showDisplayValue')
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            disabled={loading}
+                            value={
+                              data.showDisplayValue
+                                ? data.current_value_display
+                                : data.current_value
+                            }
+                            onChange={(e) => {
+                              onChange(e.target.value, idx, 'current_value')
+                              onChange(
+                                e.target.value,
+                                idx,
+                                'current_value_display'
+                              )
+                            }}
+                            onFocus={(e) => {
+                              onChange(false, idx, 'showDisplayValue')
+                            }}
+                            onBlur={(e) => {
+                              onChange(true, idx, 'showDisplayValue')
+                            }}
+                          />
+                        </td>
+                        <td
+                          className={
+                            data.returns > 0 ? 'text-success' : 'text-danger'
                           }
-                          value={
-                            data.showDisplayValue
-                              ? data.invested_value_display
-                              : data.invested_value
-                          }
-                          onChange={(e) => {
-                            onChange(e.target.value, idx, 'invested_value')
-                            onChange(
-                              e.target.value,
-                              idx,
-                              'invested_value_display'
-                            )
-                          }}
-                          onFocus={(e) => {
-                            onChange(false, idx, 'showDisplayValue')
-                          }}
-                          onBlur={(e) => {
-                            onChange(true, idx, 'showDisplayValue')
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled={loading}
-                          value={
-                            data.showDisplayValue
-                              ? data.current_value_display
-                              : data.current_value
-                          }
-                          onChange={(e) => {
-                            onChange(e.target.value, idx, 'current_value')
-                            onChange(
-                              e.target.value,
-                              idx,
-                              'current_value_display'
-                            )
-                          }}
-                          onFocus={(e) => {
-                            onChange(false, idx, 'showDisplayValue')
-                          }}
-                          onBlur={(e) => {
-                            onChange(true, idx, 'showDisplayValue')
-                          }}
-                        />
-                      </td>
-                      <td
-                        className={
-                          data.returns > 0 ? 'text-success' : 'text-danger'
-                        }
-                      >
-                        {data.returns + '%'}
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled={loading}
-                          value={
-                            data.showDisplayValue
-                              ? data.comments
-                              : formatString(data.comments)
-                          }
-                          onChange={(e) => {
-                            onChange(e.target.value, idx, 'comments')
-                          }}
-                        ></input>
-                      </td>
-                      <td>{data.risk}</td>
-                    </tr>
-                  )
-                })}
-            </tbody>
-          </table>
+                        >
+                          {data.returns + '%'}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            disabled={loading}
+                            value={
+                              data.showDisplayValue
+                                ? data.comments
+                                : formatString(data.comments)
+                            }
+                            onChange={(e) => {
+                              onChange(e.target.value, idx, 'comments')
+                            }}
+                          ></input>
+                        </td>
+                        <td>{data.risk}</td>
+                      </tr>
+                    )
+                  })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div className="card border-0 shadow my-2 p-2">
