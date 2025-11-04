@@ -55,7 +55,7 @@ export default function ExpenseList(props) {
       <div className="row card border-0 shadow">
         <div className="card-header border-0">
           <div className="row align-items-center ">
-            <span className="col-3 card-header-title py-2 text-muted mb-0">
+            <span className="col-6 col-md-3 card-header-title py-2 text-muted mb-0">
               Total: &nbsp;
               {formatCurrency(
                 props.expenses
@@ -68,10 +68,10 @@ export default function ExpenseList(props) {
                   )
               )}
             </span>
-            <h6 className="col-6 card-header-title h6 p-2 text-muted text-center mb-0">
+            <h6 className="col-12 col-md-6 card-header-title h6 p-2 text-muted text-center mb-0 order-first order-md-0">
               EXPENSES {titleDateString}
             </h6>
-            <div className="col-3">
+            <div className="col-6 col-md-3">
               <input
                 className="form-control form-control-sm"
                 type="text"
@@ -159,7 +159,7 @@ export default function ExpenseList(props) {
                 </select>
               </div>
             </div>
-            <div className="col-md-3 col-12 text-end pe-1 pt-sm-1">
+            <div className="col-md-3 col-12 text-end pe-1 pt-1 pt-md-0">
               <button
                 type="button"
                 className={

@@ -486,7 +486,7 @@ export default function HomePage() {
         <div>
           <div className="container p-3 m-auto">
             <form className="row justify-content-start align-items-center">
-              <div className="ps-0 col-10 col-md-auto">
+              <div className="ps-0 col-6 col-md-auto">
                 <select
                   id="selectMonth"
                   className="form-select form-select-md m-2"
@@ -504,7 +504,7 @@ export default function HomePage() {
                   ))}
                 </select>
               </div>
-              <div className="ps-0 col-10 col-md-auto">
+              <div className="ps-0 col-6 col-md-auto">
                 <select
                   id="selectYear"
                   className="form-select form-select-md m-2"
@@ -522,25 +522,27 @@ export default function HomePage() {
                   ))}
                 </select>
               </div>
-              <div className="col-auto">
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  disabled={!Boolean(year)}
-                  onClick={(e) => {
-                    start()
-                  }}
-                >
-                  Go
-                </button>
-              </div>
-              <div className="col-auto">
-                <i
-                  className="bi bi-arrow-clockwise"
-                  type="button"
-                  data-bs-title="Refresh"
-                  onClick={() => refreshPage()}
-                ></i>
+              <div className="px-auto col-6 col-md-auto row align-items-center">
+                <div className="col-auto">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    disabled={!Boolean(year)}
+                    onClick={(e) => {
+                      start()
+                    }}
+                  >
+                    Go
+                  </button>
+                </div>
+                <div className="col-auto">
+                  <button class="btn btn-primary btn-sm">
+                    <i
+                      class="bi bi-arrow-clockwise"
+                      data-bs-title="Refresh"
+                    ></i>
+                  </button>
+                </div>
               </div>
             </form>
             <div className="row pb-2">
