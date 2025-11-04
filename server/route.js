@@ -184,7 +184,7 @@ const graphByMonths = async (req, res, next, db) => {
 
 const graphCategoriesByMonths = async (req, res, next, db) => {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const { year } = req.query
+  const { year, category } = req.query
   const pipelines = [
     {
       $match: {
@@ -199,6 +199,7 @@ const graphCategoriesByMonths = async (req, res, next, db) => {
             details: {
               $nin: appMetadata.ignoredExpenses,
             },
+            category,
           },
         ],
       },

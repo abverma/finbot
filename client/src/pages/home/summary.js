@@ -198,6 +198,21 @@ export default function Summary(props) {
           </dl>
         ) : null}
 
+        {props.aggregate?.length ? (
+          <dl className="row mb-0">
+            <dt className="col-7">
+              <i className="bi bi-box-arrow-in-down px-2"></i>Savings
+            </dt>
+            <dd className="col-5">
+              {formatCurrency(
+                props.salary -
+                  props.total -
+                  props.aggregate.find((x) => x._id === 'investment')?.total
+              )}
+            </dd>
+          </dl>
+        ) : null}
+
         {props.aggregate?.length &&
         props.aggregate.find((x) => x._id === 'investment') ? (
           <dl className="row mt-4 mb-0">

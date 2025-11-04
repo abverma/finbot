@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react'
-import { formatCurrency } from '../../lib/uiHelper'
+import { formatCurrency, formatString } from '../../lib/uiHelper'
 
 export default function PortfolioPage() {
   const [mutualFunds, dispatch] = useReducer(reducer, [])
@@ -46,6 +46,7 @@ export default function PortfolioPage() {
             ((x.current_value - x.invested_value) / x.invested_value) *
             100
           ).toFixed(2),
+          comments: formatString(x.comments),
         }
       }),
     })
@@ -188,6 +189,12 @@ export default function PortfolioPage() {
                 <th scope="col" className="text-muted">
                   Returns
                 </th>
+                <th scope="col" className="text-muted">
+                  Risk
+                </th>
+                <th scope="col" className="text-muted">
+                  Comments
+                </th>
               </tr>
             </thead>
             <tbody className="list">
@@ -260,6 +267,22 @@ export default function PortfolioPage() {
                       >
                         {data.returns + '%'}
                       </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          disabled={loading}
+                          value={
+                            data.showDisplayValue
+                              ? data.comments
+                              : formatString(data.comments)
+                          }
+                          onChange={(e) => {
+                            onChange(e.target.value, idx, 'comments')
+                          }}
+                        ></input>
+                      </td>
+                      <td>{data.risk}</td>
                     </tr>
                   )
                 })}

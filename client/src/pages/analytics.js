@@ -2,10 +2,14 @@ import React, { useState, useEffect, useRef } from 'react'
 
 export default function AnalyticsPage() {
   const [year, setYear] = useState('2025')
-  let mainChart = useRef({})
-  let categoryChart = useRef({})
+  const [expenseCategories, setExpenseCategories] = useState([])
+  const [category, setCategory] = useState('')
+  const mainChart = useRef({})
+  const categoryChart = useRef({})
 
   useEffect(() => {
+    // when component unmounts
+
     fetchMainChartData()
     fetch('/expenseCategories')
       .then((data) => data.json())
@@ -16,7 +20,7 @@ export default function AnalyticsPage() {
         console.log(e)
       })
     fetchCategoryChartData()
-  }, [year])
+  }, [year, category])
 
   async function fetchMainChartData() {
     try {
@@ -48,15 +52,10 @@ export default function AnalyticsPage() {
           },
         ],
       }
-      if (mainChart.current.id !== undefined) {
-        mainChart.current.data = chartData
-        mainChart.current.update()
-      } else {
-        mainChart.current = new Chart(ctx, {
-          type: 'line',
-          data: chartData,
-        })
-      }
+      new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+      })
     } catch (e) {
       console.log(e)
     }
@@ -65,7 +64,9 @@ export default function AnalyticsPage() {
   async function fetchCategoryChartData() {
     try {
       const data = await (
-        await fetch(`/graphCategoriesByMonths?year=${year}`)
+        await fetch(
+          `/graphCategoriesByMonths?year=${year}&category=${category}`
+        )
       ).json()
       const flatData = data.map((x) => {
         return {
@@ -103,15 +104,10 @@ export default function AnalyticsPage() {
           }
         }),
       }
-      if (categoryChart.current.id !== undefined) {
-        categoryChart.current.data = chartData
-        categoryChart.current.update()
-      } else {
-        categoryChart.current = new Chart(categoryChartCtx, {
-          type: 'line',
-          data: chartData,
-        })
-      }
+      new Chart(categoryChartCtx, {
+        type: 'line',
+        data: chartData,
+      })
     } catch (e) {
       console.log(e)
     }
@@ -119,6 +115,10 @@ export default function AnalyticsPage() {
 
   function handleSelect(e) {
     setYear(e.target.value)
+  }
+
+  function handleCategorySelect(e) {
+    setCategory(e.target.value)
   }
 
   return (
@@ -160,9 +160,21 @@ export default function AnalyticsPage() {
         <h4>Category-wise Expenses</h4>
         <select
           className="form-select"
-          onChange={(e) => handleSelect(e)}
+          onChange={(e) => handleCategorySelect(e)}
           value={year}
-        ></select>
+        >
+          <option defaultValue value="">
+            Select Category
+          </option>
+          {expenseCategories.map((category) => {
+            return (
+              <option value={category.category} key={category._id}>
+                {category.category}
+              </option>
+            )
+          })}
+        </select>
+
         <canvas
           id="categoryChart"
           style={{ position: 'relative', height: '40vh', width: '60vw' }}

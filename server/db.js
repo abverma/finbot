@@ -89,6 +89,8 @@ const MutualFunds = mongoose.model('mutual_funds', {
     type: Date,
     default: Date.now,
   },
+  comments: String,
+  risk: String,
 })
 
 const connect = async function () {

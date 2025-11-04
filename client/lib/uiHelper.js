@@ -18,3 +18,13 @@ export function formatCurrency(value) {
     currency: 'INR',
   })
 }
+
+export function formatString(value) {
+  if (!value) {
+    return ''
+  }
+  if (demoMode) {
+    return '******'
+  }
+  return value
+}
